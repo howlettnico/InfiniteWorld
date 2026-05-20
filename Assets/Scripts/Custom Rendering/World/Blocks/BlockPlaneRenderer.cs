@@ -136,7 +136,6 @@ namespace Custom_Rendering.World.Blocks
 
                     Block b = _blockManager.GetBlock(world, ground);
 
-                    
                     _blockData[i] = b == null ? 
                         new BlockRenderData
                             {typeID = 0, rotated = 0}: 

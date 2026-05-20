@@ -68,7 +68,7 @@ namespace Player
         public bool TryPlace(BlockType.BlockTypeID id, bool rotated = false)
         {
             Coord p = FocusedCoord();
-            return _blockManager.TrySetBlock(p, _blockManager.NewBlock(id, p, rotated, false, true), false);
+            return _blockManager.TrySetBlock(p, _blockManager.NewBlock(id, p, false, rotated, true), false);
         }
         
         public void BreakGround()
