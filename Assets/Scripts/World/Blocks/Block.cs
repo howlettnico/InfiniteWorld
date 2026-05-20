@@ -51,8 +51,9 @@ namespace World.Blocks
         {;
             _itemManager = App.App.Get<ItemManager>();
             _blockManager = App.App.Get<BlockManager>();
-            
-            this.pos = pos;
+
+            type = _blockManager.GetBlockType(r.ID);
+            pos = r.pos;
             this.inGround = inGround;
             record = true;
             rotated = r.rotated;

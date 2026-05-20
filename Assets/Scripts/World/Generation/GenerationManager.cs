@@ -82,7 +82,7 @@ namespace World.Generation
                     }
                     else
                     {
-                        groundID = BlockType.BlockTypeID.Grass;
+                        groundID = BlockType.BlockTypeID.Dirt;
                         aboveGroundID = BlockType.BlockTypeID.CedarLog;
                     }
 

@@ -18,10 +18,10 @@ namespace World.Blocks.CustomBlocks
         
         public override void Update()
         {
-            // if (inGround && _blockManager.GetBlock(pos, false).type.solid)
-            // {
-            //     _blockManager.SetBlock(pos, _blockManager.NewBlock(BlockType.BlockTypeID.Dirt, pos, true, false, true), true);
-            // }
+            if (inGround && _blockManager.GetBlock(pos, false).type.solid)
+            {
+                _blockManager.SetBlock(pos, _blockManager.NewBlock(BlockType.BlockTypeID.Dirt, pos, true, false, true), true);
+            }
         }
 
         // private void LoadData(BlockData d)
