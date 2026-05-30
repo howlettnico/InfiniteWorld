@@ -208,8 +208,8 @@ namespace World.Loading
         public Block GetBlock(Coord world, bool ground)
         {
             Coord chunkPos = Chunk.Chunk.WorldToChunk(world);
-            if (!_loadedChunks.TryGetValue(chunkPos.PackIntoLong(), out Chunk.Chunk c)) //return null;
-                throw new Exception($"Failed to get block {world.ToString()} in chunk {chunkPos.ToString()} from loadedChunks");
+            if (!_loadedChunks.TryGetValue(chunkPos.PackIntoLong(), out Chunk.Chunk c)) return null;
+                // throw new Exception($"Failed to get block {world.ToString()} in chunk {chunkPos.ToString()} from loadedChunks");
 
             return c.GetBlock(world, ground);
         }
@@ -239,6 +239,11 @@ namespace World.Loading
             
             return true;
         }
+
+        // public bool BlockLoaded(Coord world)
+        // {
+        //     
+        // }
 
         public Inventory BreakBlock(Coord world, bool ground)
         {

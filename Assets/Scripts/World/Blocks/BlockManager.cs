@@ -103,6 +103,7 @@ namespace World.Blocks
             {
                 BlockType.BlockScript.Normal => new Block(type, pos, inGround, rotated, record, data),
                 BlockType.BlockScript.Grass  => new GrassBlock(type, pos, inGround, rotated, record, data),
+                BlockType.BlockScript.Dirt  => new DirtBlock(type, pos, inGround, rotated, record, data),
                 _ => throw new Exception($"Custom Script {type.blockScript} is not assigned")
             };
         }
@@ -124,6 +125,7 @@ namespace World.Blocks
             {
                 BlockType.BlockScript.Normal => new Block(type, pos, inGround, rotated, record),
                 BlockType.BlockScript.Grass  => new GrassBlock(type, pos, inGround, rotated, record),
+                BlockType.BlockScript.Dirt  => new DirtBlock(type, pos, inGround, rotated, record),
                 _ => throw new Exception($"Custom Script {type.blockScript} is not assigned")
             };
         }
@@ -142,12 +144,7 @@ namespace World.Blocks
         {
             //Select the correct block type using type
             BlockType type = GetBlockType(typeID);
-            return type.blockScript switch
-            {
-                BlockType.BlockScript.Normal => new Block(type, pos, inGround, rotated, record),
-                BlockType.BlockScript.Grass  => new GrassBlock(type, pos, inGround, rotated, record),
-                _ => throw new Exception($"Custom Script {type.blockScript} is not assigned")
-            };
+            return NewBlock(type, pos, inGround, rotated, record);
         }
 
         /// <summary>
@@ -163,9 +160,11 @@ namespace World.Blocks
             {
                 BlockType.BlockScript.Normal => new Block(r, inGround),
                 BlockType.BlockScript.Grass  => new GrassBlock(r, inGround),
+                BlockType.BlockScript.Dirt  => new DirtBlock(r, inGround),
                 _ => throw new Exception($"Custom Script {GetBlockType(r.ID).blockScript} is not assigned")
             };
         }
+
         
     }
 }

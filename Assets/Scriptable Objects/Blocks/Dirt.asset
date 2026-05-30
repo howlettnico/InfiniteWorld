@@ -14,3 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::World.Blocks.BlockType
   ID: 1
   blockName: Dirt
+  textureIndex: 1
+  animated: 0
+  animationFrameCount: 1
+  animationFPS: 1
+  rotatable: 0
+  drops: []
+  solid: 0
+  replaceable: 0
+  blockScript: 2

@@ -14,6 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::World.Blocks.BlockType
   ID: 3
   blockName: Large Grass
+  textureIndex: 3
+  animated: 0
+  animationFrameCount: 1
+  animationFPS: 1
+  rotatable: 0
   drops: []
   solid: 0
   replaceable: 1
+  blockScript: 0
