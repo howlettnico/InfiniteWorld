@@ -1,3 +1,4 @@
+using NUnit.Framework.Constraints;
 using UnityEngine;
 using Utilities;
 using Random = UnityEngine.Random;
@@ -6,6 +7,8 @@ namespace World.Blocks.CustomBlocks
 {
     public class DirtBlock : CustomBlock
     {
+        public override bool needsUpdate => true;
+        
         public DirtBlock(Block b) : base(b) { }
         
         public override void Update()
@@ -28,7 +31,7 @@ namespace World.Blocks.CustomBlocks
             
             if (Random.Range(0, 1000) < neighbors)
             {
-                _blockManager.SetBlock(block.pos, _blockManager.NewBlock(BlockType.BlockTypeID.Grass, block.pos, true, false, true), true);
+                _blockManager.SetBlock(block.pos, _blockManager.NewBlock(BlockType.BlockTypeID.Grass, block.pos, true, false, 0, true), true);
             }
         }
     }

@@ -10,7 +10,6 @@ namespace World.Blocks
 {
     public class Block
     {
-        
         // ***** Managers ******
         public ItemManager _itemManager;
         public BlockManager _blockManager;
@@ -21,10 +20,10 @@ namespace World.Blocks
         public bool inGround;
         public bool save;
         public bool rotated;
-        public bool custom;
+        public int state;
         public CustomBlock blockScript;
 
-        public Block(BlockType type, Coord pos, bool inGround, bool rotated, bool save, CustomBlock.BlockData d = null)
+        public Block(BlockType type, Coord pos, bool inGround, bool rotated, int state, bool save, CustomBlock.BlockData d = null)
         {
             _itemManager = App.App.Get<ItemManager>();
             _blockManager = App.App.Get<BlockManager>();
@@ -34,7 +33,8 @@ namespace World.Blocks
             this.inGround = inGround;
             this.save = save;
             this.rotated = rotated;
-            custom = type.blockScript != BlockType.BlockScript.None;
+            if (this.state >= type.states.Length) Debug.LogError("State " + state + " does not exist for type " + type.name);
+            this.state = state;
 
             SetScript();
             
@@ -51,19 +51,21 @@ namespace World.Blocks
             this.inGround = inGround;
             save = true;
             rotated = r.rotated;
-            custom = type.blockScript != BlockType.BlockScript.None;
+            if (state >= type.states.Length) Debug.LogError("State " + state + " does not exist for type " + type.name);
+            state = r.state;
 
             SetScript();
         }
 
         private void SetScript()
         {
-            if (!custom) return;
+            if (!type.customScript) return;
 
             blockScript = type.blockScript switch
             {
                 BlockType.BlockScript.Grass  => new GrassBlock(this),
                 BlockType.BlockScript.Dirt  => new DirtBlock(this),
+                BlockType.BlockScript.Chest  => new ChestBlock(this),
                 _ => throw new Exception($"Custom Script {type.blockScript} is not assigned")
             };
         }
@@ -91,8 +93,8 @@ namespace World.Blocks
 
         public BlockRecord GetRecord()
         {
-            CustomBlock.BlockData data = custom ? blockScript.GetBlockData() : null;
-            return new BlockRecord(type.ID, pos, rotated, data);
+            CustomBlock.BlockData data = type.customScript ? blockScript.GetBlockData() : null;
+            return new BlockRecord(type.ID, pos, rotated, (int) state, data);
         }
     }
 }

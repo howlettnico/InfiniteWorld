@@ -10,44 +10,58 @@ namespace World.Blocks
         public class BlockType : ScriptableObject
         {
                 // To create a new type:
-                //      - Create new scriptable object
+                //      - Upload new Texture
+                //      - Create new scriptable object and add to _AllBlocks
+                //      - Generate new texture on _AllBlocks
                 //      - Add BlockTypeID in BlockType script and select on scriptable object
-                //      - Add scriptable object to the BlockManager in scene
-                //      - Upload new Texture and update BlockPlane Material (/Assets/Rendering/Custom Material/BlockPlane)
                 //      - if custom script
                 //              - write script that extends CustomBlock
                 //              - add CustomBlock Script to BlockType script
                 //              - select custom script in scriptable object
+                //              - add script to SetScript function in Block class
                 public enum BlockTypeID
                 {
-                        Grass = 0,
-                        Dirt = 1,
-                        Air = 2,
-                        LargeGrass = 3,
-                        CedarLog = 4,
-                        Sand = 5,
-                        Water = 6,
-                        CedarLogSide = 7
+                        Null = 0,
+                        Grass = 10,
+                        Dirt = 20,
+                        Air = 30,
+                        LargeGrass = 40,
+                        CedarLog = 50,
+                        CedarLogSide = 51,
+                        Sand = 60,
+                        Water = 70,
+                        Chest = 80,
                 }
 
                 public enum BlockScript
                 {
                         None = 0,
-                        Grass = 1,
-                        Dirt = 2
+                        Grass = 10,
+                        Dirt = 20,
+                        Chest = 30,
                 }
-                
-                public BlockTypeID ID;
+
+                public BlockTypeID ID = BlockTypeID.Null;
                 public string blockName;
-                [HideInInspector] public int textureIndex;
-                public bool animated;
-                public int animationFrameCount = 1;
-                public float animationFPS = 1;
+                public Texture2D texture;
+                public BlockState[] states = new BlockState[1];
                 public bool rotatable;
                 public Drop[] drops;
                 public bool solid;
                 public bool replaceable;
-                public BlockScript blockScript;
+                public BlockScript blockScript = BlockScript.None;
+                public bool customScript => blockScript != BlockScript.None;
                 public bool customData;
+
+                
+                [Serializable]
+                public class BlockState
+                {
+                        public int baseTextureIndex;
+                        [HideInInspector] public int trueTextureIndex;
+                        public bool animated;
+                        public int animationFrameCount = 1;
+                        public float animationFPS = 1;
+                }
         }
 }

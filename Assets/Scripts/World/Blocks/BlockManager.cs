@@ -12,24 +12,31 @@ namespace World.Blocks
 {
     public class BlockManager : AppModule
     {
-        [SerializeField] public BlockType[] types;
         private ChunkLoadManager _loadManager;
+        
+        [SerializeField] public BlockTypeCollection typeCollection;
+        [HideInInspector] public BlockType[] types;
+        private Dictionary<int, int> typeIDToIndex;
+        public int numStates;
 
         private void Start()
         {
             _loadManager = App.App.Get<ChunkLoadManager>();
-            int i = 0;
-            foreach (BlockType t in types)
+            
+            types = typeCollection.types;
+
+            typeIDToIndex = new Dictionary<int, int>();
+            for (int i = 0; i < types.Length; i++)
             {
-                t.textureIndex = i;
-                if (t.animated) i += t.animationFrameCount;
-                else i++;
+                typeIDToIndex.Add((int) types[i].ID, i);
+                // Debug.Log((int) types[i].ID + " -> " + i);
+                numStates += types[i].states.Length;
             }
         }
 
         public BlockType GetBlockType(BlockType.BlockTypeID id)
         {
-            return types[(int) id];
+            return types[GetIndex(id)];
         }
 
         public Block GetBlock(Coord c, bool ground)
@@ -84,7 +91,7 @@ namespace World.Blocks
         {
             return types.Length;
         }
-        
+
         /// <summary>
         /// Creates a new block of given type with saved block data
         /// </summary>
@@ -92,13 +99,14 @@ namespace World.Blocks
         /// <param name="pos">World position of block</param>
         /// <param name="inGround">Whether or not the block is in the ground layer</param>
         /// <param name="rotated">Whether or not the block is rotated</param>
+        /// <param name="state">Block State</param>
         /// <param name="save">Whether or not the block should be recorded</param>
         /// <param name="data">Saved block data</param>
         /// <returns>A new Block of given type</returns>
         /// <exception cref="Exception">When the desired block type has not been assigned</exception>
-        public Block NewBlock(BlockType type, Coord pos, bool inGround, bool rotated, bool save, CustomBlock.BlockData data = null)
+        public Block NewBlock(BlockType type, Coord pos, bool inGround, bool rotated, int state, bool save, CustomBlock.BlockData data = null)
         {
-            return new Block(type, pos, inGround, rotated, save, data);
+            return new Block(type, pos, inGround, rotated, state, save, data);
         }
 
         /// <summary>
@@ -108,14 +116,15 @@ namespace World.Blocks
         /// <param name="pos">World position of block</param>
         /// <param name="inGround">Whether or not the block is in the ground layer</param>
         /// <param name="rotated">Whether or not the block is rotated</param>
+        /// <param name="state">Block state</param>
         /// <param name="save">Whether or not the block should be recorded</param>
         /// <param name="data">Saved block data</param>
         /// <returns>A new Block of given type</returns>
         /// <exception cref="Exception">When the desired block type has not been assigned</exception>
-        public Block NewBlock(BlockType.BlockTypeID typeID, Coord pos, bool inGround, bool rotated, bool save, CustomBlock.BlockData data = null)
+        public Block NewBlock(BlockType.BlockTypeID typeID, Coord pos, bool inGround, bool rotated, int state, bool save, CustomBlock.BlockData data = null)
         {
             BlockType type = GetBlockType(typeID);
-            return NewBlock(type, pos, inGround, rotated, save, data);
+            return NewBlock(type, pos, inGround, rotated, state, save, data);
         }
 
         /// <summary>
@@ -128,6 +137,13 @@ namespace World.Blocks
         public Block NewBlock(BlockRecord r, bool inGround)
         {
             return new Block(r, inGround);
+        }
+
+        public int GetIndex(BlockType.BlockTypeID id)
+        {
+            if (!typeIDToIndex.TryGetValue((int)id, out int index)) Debug.LogError("Type ID " + id + " is not in mapping dictionary");
+
+            return index;
         }
     }
 }

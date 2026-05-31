@@ -1240,15 +1240,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 851587af0a20c47f4bb7da2081954af3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::World.Blocks.BlockManager
-  types:
-  - {fileID: 11400000, guid: fad236aa1888f4ec8878c7d484e3c14f, type: 2}
-  - {fileID: 11400000, guid: e7d92cf233e8b44e5ae52fc0238deb05, type: 2}
-  - {fileID: 11400000, guid: bdbe1324f9657479cafbbe5cbc25579f, type: 2}
-  - {fileID: 11400000, guid: adef28e9980bb4a878cf59b84deecf97, type: 2}
-  - {fileID: 11400000, guid: 20a325a5f4f964a61b0b8651f6880ee3, type: 2}
-  - {fileID: 11400000, guid: 8ee0ae45040484bbe8e526364ac86d88, type: 2}
-  - {fileID: 11400000, guid: 8a3133170236a4097ad841f62915cbfe, type: 2}
-  - {fileID: 11400000, guid: 4e2bf71abf7a3466cabfc8c2aad8320e, type: 2}
+  typeCollection: {fileID: 11400000, guid: 41b79205de870457dac01f097cda0aab, type: 2}
+  types: []
 --- !u!4 &1472771792
 Transform:
   m_ObjectHideFlags: 0
@@ -1422,11 +1415,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 7871419538228371127, guid: c0990adfe072b455e91723b844e2d834, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 290
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7871419538228371127, guid: c0990adfe072b455e91723b844e2d834, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 60
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7871419538228371127, guid: c0990adfe072b455e91723b844e2d834, type: 3}
       propertyPath: m_LocalPosition.z

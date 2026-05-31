@@ -5,6 +5,7 @@ using UnityEngine;
 using World.Blocks;
 using Utilities;
 using Utilities.NoiseDotNet;
+using World.Blocks.CustomBlocks;
 using Random = UnityEngine.Random;
 using Chuck = World.Chunk.Chunk;
 
@@ -52,6 +53,8 @@ namespace World.Generation
                     //Assigning Ground Block
                     BlockType.BlockTypeID groundID = 0;
                     BlockType.BlockTypeID aboveGroundID = 0;
+                    int groundBlockState = 0;
+                    int aboveGroundBlockState = 0;
 
                     // if (Mathf.Abs(height) > 0.5f) Debug.Log(height + " " + blockPos.ToString());
 
@@ -86,10 +89,10 @@ namespace World.Generation
                         aboveGroundID = BlockType.BlockTypeID.CedarLog;
                     }
 
-                    Block ground = _blockManager.NewBlock(groundID, blockPos, true, false, false);
+                    Block ground = _blockManager.NewBlock(groundID, blockPos, true, false, groundBlockState, false);
                     c.SetBlock(blockPos, ground, true);
 
-                    Block aboveGround = _blockManager.NewBlock(aboveGroundID, blockPos, false, false, false);
+                    Block aboveGround = _blockManager.NewBlock(aboveGroundID, blockPos, false, false, aboveGroundBlockState, false);
                     c.SetBlock(blockPos, aboveGround, false);
                 }
             }

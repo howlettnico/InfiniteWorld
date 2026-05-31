@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c5f38d5bc12494e9e7e0580ee69f970, type: 3}
+  m_Name: _All Blocks
+  m_EditorClassIdentifier: Assembly-CSharp::World.Blocks.BlockTypeCollection
+  blockPlaneMaterial: {fileID: 2100000, guid: 56553be84217348fc8e7c8f7fda6f754, type: 2}
+  nullType: {fileID: 11400000, guid: 575376d9f766e4313ba886f526192c69, type: 2}
+  types:
+  - {fileID: 11400000, guid: fad236aa1888f4ec8878c7d484e3c14f, type: 2}
+  - {fileID: 11400000, guid: e7d92cf233e8b44e5ae52fc0238deb05, type: 2}
+  - {fileID: 11400000, guid: bdbe1324f9657479cafbbe5cbc25579f, type: 2}
+  - {fileID: 11400000, guid: adef28e9980bb4a878cf59b84deecf97, type: 2}
+  - {fileID: 11400000, guid: 20a325a5f4f964a61b0b8651f6880ee3, type: 2}
+  - {fileID: 11400000, guid: 4e2bf71abf7a3466cabfc8c2aad8320e, type: 2}
+  - {fileID: 11400000, guid: 8ee0ae45040484bbe8e526364ac86d88, type: 2}
+  - {fileID: 11400000, guid: 8a3133170236a4097ad841f62915cbfe, type: 2}
+  - {fileID: 11400000, guid: 88b877aca681346579ea19daf1e02ded, type: 2}
