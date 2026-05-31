@@ -74,17 +74,23 @@ namespace Player
         public void BreakGround()
         {
             Coord p = FocusedCoord();
-            Inventory i = _blockManager.BreakBlock(p, true);
-            Inventory rem = inventory.TryAdd(i);
-            //TODO drop rem items on ground
+            _blockManager.BreakBlock(p, true);
         }
 
         public void Break()
         {
             Coord p = FocusedCoord();
-            Inventory i = _blockManager.BreakBlock(p, false);
+            _blockManager.BreakBlock(p, false);
+        }
+
+        public Inventory TryAddToInventory(Inventory i, bool returnRemainder)
+        {
             Inventory rem = inventory.TryAdd(i);
-            //TODO drop rem items on ground
+
+            if (returnRemainder) return rem;
+            
+            //TODO drop onto ground
+            return new Inventory();
         }
 
         //***** Helpers *****

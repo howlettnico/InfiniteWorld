@@ -70,7 +70,7 @@ namespace World.Blocks
             };
         }
 
-        public Inventory Break()
+        public void Break()
         {
             Inventory i = new Inventory(0, true);
             foreach (Drop d in type.drops)
@@ -88,7 +88,7 @@ namespace World.Blocks
                         $"Failed to add all {item.customItemName}s to expandable inventory: THIS SHOULD BE IMPOSSIBLE");
             }
 
-            return i;
+            if (!i.Empty()) _itemManager.CreateInventoryEntity(i, new Vector2(0.5f, 0.5f) + (Vector2) pos, true);
         }
 
         public BlockRecord GetRecord()

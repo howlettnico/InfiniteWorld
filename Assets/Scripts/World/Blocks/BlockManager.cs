@@ -78,9 +78,9 @@ namespace World.Blocks
         /// <param name="c">World position of block</param>
         /// <param name="ground">Whether or not the block is in the ground layer</param>
         /// <returns>The inventory of the broken block (what the block dropped)</returns>
-        public Inventory BreakBlock(Coord c, bool ground)
+        public void BreakBlock(Coord c, bool ground)
         {
-            return _loadManager.BreakBlock(c, ground);
+            _loadManager.BreakBlock(c, ground);
         }
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace World.Blocks
 
         public int GetIndex(BlockType.BlockTypeID id)
         {
-            if (!typeIDToIndex.TryGetValue((int)id, out int index)) Debug.LogError("Type ID " + id + " is not in mapping dictionary");
+            if (!typeIDToIndex.TryGetValue((int)id, out int index)) Debug.LogError("BlockType ID " + id + " is not in mapping dictionary");
 
             return index;
         }

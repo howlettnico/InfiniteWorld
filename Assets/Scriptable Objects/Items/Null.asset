@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Features.Items.ItemType
   ID: 0
   itemName: 
+  texture: {fileID: -1007824605921987003, guid: 3b60ee3dbfc8440728682c148940c0aa, type: 3}
   stackSize: 0
   placeable: 0
   placedBlockID: 0

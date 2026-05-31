@@ -320,18 +320,16 @@ namespace World.Loading
         //     
         // }
 
-        public Inventory BreakBlock(Coord world, bool ground)
+        public void BreakBlock(Coord world, bool ground)
         {
             Coord chunkPos = Chunk.Chunk.WorldToChunk(world);
             if (!_loadedChunks.TryGetValue(chunkPos.PackIntoLong(), out Chunk.Chunk c)) //return null;
                 throw new Exception($"Failed to set block {world.ToString()} in chunk {chunkPos.ToString()} from loadedChunks");
 
-            Inventory i = c.BreakBlock(world, ground);
+            c.BreakBlock(world, ground);
             
             //TODO make this not have to reload the entire chunk whenever a collider is added
             LoadChunkColliders(c);
-
-            return i;
         }
 
         // ***** Helpers *****

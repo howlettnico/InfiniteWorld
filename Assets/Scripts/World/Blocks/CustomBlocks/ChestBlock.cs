@@ -12,5 +12,7 @@ namespace World.Blocks.CustomBlocks
 
         public ChestBlock(Block b) : base(b)
         { }
+        
+        
     }
 }
