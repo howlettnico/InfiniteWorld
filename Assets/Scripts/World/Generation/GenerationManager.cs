@@ -86,10 +86,10 @@ namespace World.Generation
                         aboveGroundID = BlockType.BlockTypeID.CedarLog;
                     }
 
-                    Block ground = _blockManager.NewBlock(groundID, blockPos, true, false);
+                    Block ground = _blockManager.NewBlock(groundID, blockPos, true, false, false);
                     c.SetBlock(blockPos, ground, true);
 
-                    Block aboveGround = _blockManager.NewBlock(aboveGroundID, blockPos, false, false);
+                    Block aboveGround = _blockManager.NewBlock(aboveGroundID, blockPos, false, false, false);
                     c.SetBlock(blockPos, aboveGround, false);
                 }
             }

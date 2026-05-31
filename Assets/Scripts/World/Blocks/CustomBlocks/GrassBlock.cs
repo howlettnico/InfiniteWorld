@@ -5,25 +5,17 @@ using Random = UnityEngine.Random;
 
 namespace World.Blocks.CustomBlocks
 {
-    public class GrassBlock : Block
+    public class GrassBlock : CustomBlock
     {
         private GrassBlockData gd;
-
-        public GrassBlock(BlockType type, Coord pos, bool inGround, bool rotated, bool record, BlockData b) : base(type, pos, inGround, rotated,
-            record, b)
-        {
-        }
-        public GrassBlock(BlockType type, Coord pos, bool inGround, bool rotated, bool record) : base(type, pos, inGround, rotated, record) 
-        {
-        }
-
-        public GrassBlock(BlockRecord r, bool inGround) : base(r, inGround) {}
+        
+        public GrassBlock(Block b) : base(b) { }
         
         public override void Update()
         {
-            if (inGround && _blockManager.GetBlock(pos, false).type.solid)
+            if (block.inGround && _blockManager.GetBlock(block.pos, false).type.solid)
             {
-                _blockManager.SetBlock(pos, _blockManager.NewBlock(BlockType.BlockTypeID.Dirt, pos, true, false, true), true);
+                _blockManager.SetBlock(block.pos, _blockManager.NewBlock(BlockType.BlockTypeID.Dirt, block.pos, true, false, true), true);
             }
         }
         
@@ -38,5 +30,6 @@ namespace World.Blocks.CustomBlocks
         }
         
         public record GrassBlockData() : BlockData;
+        
     }
 }

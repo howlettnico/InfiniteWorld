@@ -3,6 +3,7 @@ using Features.Inventory;
 using Features.Items;
 using UnityEngine;
 using Utilities;
+using World.Blocks.CustomBlocks;
 using Random = UnityEngine.Random;
 
 namespace World.Blocks
@@ -20,8 +21,10 @@ namespace World.Blocks
         public bool inGround;
         public bool record;
         public bool rotated;
+        public bool custom;
+        public CustomBlock blockScript;
 
-        public Block(BlockType type, Coord pos, bool inGround, bool rotated, bool record, BlockData d)
+        public Block(BlockType type, Coord pos, bool inGround, bool rotated, bool record, CustomBlock.BlockData d = null)
         {
             _itemManager = App.App.Get<ItemManager>();
             _blockManager = App.App.Get<BlockManager>();
@@ -31,20 +34,11 @@ namespace World.Blocks
             this.inGround = inGround;
             this.record = record;
             this.rotated = rotated;
+            custom = type.blockScript != BlockType.BlockScript.None;
+
+            SetScript();
             
-            LoadData(d);
-        }
-        
-        public Block(BlockType type, Coord pos, bool inGround, bool rotated, bool record)
-        {
-            _itemManager = App.App.Get<ItemManager>();
-            _blockManager = App.App.Get<BlockManager>();
-            
-            this.type = type;
-            this.pos = pos;
-            this.inGround = inGround;
-            this.record = record;
-            this.rotated = rotated;
+            if (type.customData) blockScript.LoadData(d);
         }
 
         public Block(BlockRecord r, bool inGround)
@@ -57,6 +51,21 @@ namespace World.Blocks
             this.inGround = inGround;
             record = true;
             rotated = r.rotated;
+            custom = type.blockScript != BlockType.BlockScript.None;
+
+            SetScript();
+        }
+
+        private void SetScript()
+        {
+            if (!custom) return;
+
+            blockScript = type.blockScript switch
+            {
+                BlockType.BlockScript.Grass  => new GrassBlock(this),
+                BlockType.BlockScript.Dirt  => new DirtBlock(this),
+                _ => throw new Exception($"Custom Script {type.blockScript} is not assigned")
+            };
         }
 
         public Inventory Break()
@@ -82,27 +91,8 @@ namespace World.Blocks
 
         public BlockRecord GetRecord()
         {
-            return new BlockRecord(type.ID, pos, rotated, GetBlockData());
+            CustomBlock.BlockData data = custom ? blockScript.GetBlockData() : null;
+            return new BlockRecord(type.ID, pos, rotated, data);
         }
-
-        //Override this if there is custom block actions
-        public virtual void Update()
-        {
-            
-        }
-
-        // Override this if there is custom block data
-        public virtual BlockData GetBlockData()
-        {
-            // Debug.Log(type);
-            return new BlockData();
-        }
-        
-        // Override this if there is custom block data
-        public virtual void LoadData(BlockData d)
-        {}
-
-        // Override this if there is custom block data
-        public record BlockData();
     }
 }

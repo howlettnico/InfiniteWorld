@@ -6,25 +6,26 @@ using UnityEngine;
 using Utilities;
 using World.Chunk;
 using World.Loading;
+using World.Save;
 
 namespace Editor
 {
-    [CustomEditor(typeof(ChunkLoadManager))]
-    public class ChunkLoadManagerEditor : UnityEditor.Editor
+    [CustomEditor(typeof(SaveManager))]
+    public class SaveManagerEditor : UnityEditor.Editor
     {
         private void OnSceneGUI()
         {
             serializedObject.Update();
 
-            ChunkLoadManager m = (ChunkLoadManager) target;
+            SaveManager m = (SaveManager) target;
             Transform transform = m.transform;
             Vector3 position = transform.position;
             float size = Chunk.ChunkSize;
             
-            Handles.color = m.loadedChunksDebugColor;
+            Handles.color = m.savedChunksDebugColor;
 
             //Drawing loaded rectanlges
-            foreach (long l in m._loadedChunks.Keys)
+            foreach (long l in m.chunks.Keys)
             {
                 Coord c = new Coord(l);
                 Coord world = Chunk.ChunkToWorld(c);
