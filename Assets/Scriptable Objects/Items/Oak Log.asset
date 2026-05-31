@@ -16,4 +16,4 @@ MonoBehaviour:
   itemName: Oak Log
   stackSize: 64
   placeable: 1
-  placedBlockID: 7
+  placedBlockID: 51
