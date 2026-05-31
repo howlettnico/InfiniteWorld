@@ -49,7 +49,7 @@ namespace World.Loading
             }
         }
 
-        // ***** General Unloading and Loading *****
+        // ***** Updating Blocks *****
         public void UpdateLoadedBlocks(Coord centerChunk)
         {
             //Moving render thing
@@ -64,6 +64,9 @@ namespace World.Loading
 
             LoadedChunks = _loadedChunks.Count;
         }
+        
+
+        // ***** General Unloading and Loading *****
 
         [ContextMenu("Reload All Chunks")]
         public void ReloadChunks()

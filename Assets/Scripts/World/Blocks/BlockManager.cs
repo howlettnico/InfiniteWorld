@@ -96,26 +96,11 @@ namespace World.Blocks
         /// <param name="data">Saved block data</param>
         /// <returns>A new Block of given type</returns>
         /// <exception cref="Exception">When the desired block type has not been assigned</exception>
-        public Block NewBlock(BlockType type, Coord pos, bool inGround, bool rotated, bool record, CustomBlock.BlockData data)
+        public Block NewBlock(BlockType type, Coord pos, bool inGround, bool rotated, bool record, CustomBlock.BlockData data = null)
         {
             return new Block(type, pos, inGround, rotated, record, data);
         }
-        
-        /// <summary>
-        /// Creates a new block of given type
-        /// </summary>
-        /// <param name="type">Type of the block</param>
-        /// <param name="pos">World position of block</param>
-        /// <param name="inGround">Whether or not the block is in the ground layer</param>
-        /// <param name="rotated">Whether or not the block is rotated</param>
-        /// <param name="record">Whether or not the block should be recorded</param>
-        /// <returns>A new Block of given type</returns>
-        /// <exception cref="Exception">When the desired block type has not been assigned</exception>
-        public Block NewBlock(BlockType type, Coord pos, bool inGround, bool rotated, bool record)
-        {
-            return new Block(type, pos, inGround, rotated, record);
-        }
-        
+
         /// <summary>
         /// Creates a new block of given type (using the type's ID)
         /// </summary>
@@ -124,12 +109,13 @@ namespace World.Blocks
         /// <param name="inGround">Whether or not the block is in the ground layer</param>
         /// <param name="rotated">Whether or not the block is rotated</param>
         /// <param name="record">Whether or not the block should be recorded</param>
+        /// <param name="data">Saved block data</param>
         /// <returns>A new Block of given type</returns>
         /// <exception cref="Exception">When the desired block type has not been assigned</exception>
-        public Block NewBlock(BlockType.BlockTypeID typeID, Coord pos, bool inGround, bool rotated, bool record)
+        public Block NewBlock(BlockType.BlockTypeID typeID, Coord pos, bool inGround, bool rotated, bool record, CustomBlock.BlockData data = null)
         {
             BlockType type = GetBlockType(typeID);
-            return NewBlock(type, pos, inGround, rotated, record);
+            return NewBlock(type, pos, inGround, rotated, record, data);
         }
 
         /// <summary>
@@ -143,7 +129,5 @@ namespace World.Blocks
         {
             return new Block(r, inGround);
         }
-
-        
     }
 }

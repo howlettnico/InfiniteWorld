@@ -16,6 +16,10 @@ namespace Features.Inventory
         {
             NumSlots = numSlots;
             slots = new Slot[numSlots];
+            for (int i = 0; i < numSlots; i++)
+            {
+                slots[i] = new Slot();
+            }
             this.expandable = expandable;
         }
 

@@ -11,13 +11,13 @@ namespace World.Blocks
         {
                 // To create a new type:
                 //      - Create new scriptable object
-                //      - Add BlockTypeID in BlockType script
+                //      - Add BlockTypeID in BlockType script and select on scriptable object
                 //      - Add scriptable object to the BlockManager in scene
                 //      - Upload new Texture and update BlockPlane Material (/Assets/Rendering/Custom Material/BlockPlane)
                 //      - if custom script
-                //              - write script that extends Block
-                //              - add BlockScript to BlockType script
-                //              - go to BlockManager and add return type to NewBlock() and a bunch of other guys
+                //              - write script that extends CustomBlock
+                //              - add CustomBlock Script to BlockType script
+                //              - select custom script in scriptable object
                 public enum BlockTypeID
                 {
                         Grass = 0,
@@ -48,5 +48,6 @@ namespace World.Blocks
                 public bool solid;
                 public bool replaceable;
                 public BlockScript blockScript;
+                public bool customData;
         }
 }

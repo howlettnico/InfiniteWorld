@@ -2,6 +2,10 @@ namespace World.Blocks.CustomBlocks
 {
     public abstract class CustomBlock
     {
+        // Override this if there is custom block data
+        public abstract record BlockData;
+        
+        // Variables
         public BlockManager _blockManager;
         public Block block;
 
@@ -18,14 +22,11 @@ namespace World.Blocks.CustomBlocks
         // Override this if there is custom block data
         public virtual BlockData GetBlockData()
         {
-            return new BlockData();
+            return null;
         }
         
         // Override this if there is custom block data
         public virtual void LoadData(BlockData d)
         {}
-
-        // Override this if there is custom block data
-        public record BlockData();
     }
 }

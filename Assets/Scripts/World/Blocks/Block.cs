@@ -24,7 +24,7 @@ namespace World.Blocks
         public bool custom;
         public CustomBlock blockScript;
 
-        public Block(BlockType type, Coord pos, bool inGround, bool rotated, bool record, CustomBlock.BlockData d)
+        public Block(BlockType type, Coord pos, bool inGround, bool rotated, bool record, CustomBlock.BlockData d = null)
         {
             _itemManager = App.App.Get<ItemManager>();
             _blockManager = App.App.Get<BlockManager>();
@@ -38,22 +38,7 @@ namespace World.Blocks
 
             SetScript();
             
-            if (custom) blockScript.LoadData(d);
-        }
-        
-        public Block(BlockType type, Coord pos, bool inGround, bool rotated, bool record)
-        {
-            _itemManager = App.App.Get<ItemManager>();
-            _blockManager = App.App.Get<BlockManager>();
-            
-            this.type = type;
-            this.pos = pos;
-            this.inGround = inGround;
-            this.record = record;
-            this.rotated = rotated;
-            custom = type.blockScript != BlockType.BlockScript.None;
-
-            SetScript();
+            if (type.customData) blockScript.LoadData(d);
         }
 
         public Block(BlockRecord r, bool inGround)
