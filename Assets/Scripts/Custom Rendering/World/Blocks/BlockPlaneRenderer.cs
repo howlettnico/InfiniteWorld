@@ -19,7 +19,7 @@ namespace Custom_Rendering.World.Blocks
 
         private struct BlockRenderData
         {
-            public int typeID;
+            public int typeI;
             public int rotated;
         }
         
@@ -42,15 +42,16 @@ namespace Custom_Rendering.World.Blocks
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
+            _blockManager = App.App.Get<BlockManager>();
+            
             _rend = GetComponent<Renderer>();
             _propBlock = new MaterialPropertyBlock();
 
-            _blockManager = App.App.Get<BlockManager>();
-
-            //writing to types buffer
-            //getting type data
-            _types = new BlockTypeRenderData[_blockManager.NumTypes()];
-            int i = 0;
+            //writing to types buffer (+ 1 to account for null)
+            _types = new BlockTypeRenderData[_blockManager.NumTypes() + 1];
+            _types[0] = new BlockTypeRenderData(); //null type (everything getting set to 0 works)
+            
+            int i = 1;
             foreach (BlockType t in _blockManager.types)
             {
                 _types[i] = new BlockTypeRenderData()
@@ -136,12 +137,13 @@ namespace Custom_Rendering.World.Blocks
 
                     Block b = _blockManager.GetBlock(world, ground);
 
+
                     _blockData[i] = b == null ? 
                         new BlockRenderData
-                            {typeID = 0, rotated = 0}: 
+                            {typeI = 0, rotated = 0}: 
                         new BlockRenderData
                             {
-                                typeID = (int)b.type.ID,
+                                typeI = _blockManager.GetIndex(b.type.ID) + 1, // + 1 to account for null texture
                                 rotated = b.rotated ? 1 : 0
                             };
                 }

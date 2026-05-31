@@ -19,6 +19,18 @@ namespace Utilities
             x = Int(p.x);
             y = Int(p.y);
         }
+        
+        public static float Dist(Coord p1, Coord p2)
+        {
+            float dx = p1.x - p2.x;
+            float dy = p1.y - p2.y;
+            return Mathf.Sqrt(dx * dx + dy * dy);
+        }
+
+        public float Dist(Coord o)
+        {
+            return Dist(this, o);
+        }
 
         public Coord(long packedLong)
         {

@@ -95,7 +95,7 @@ namespace World.Loading
             foreach (long key in keys)
             {
                 Coord cPos = new Coord(key);
-                if (Helper.Dist(centerChunk, cPos) <= LoadDistance) continue;
+                if (centerChunk.Dist(cPos) <= LoadDistance) continue;
                 if (!_loadedChunks.TryGetValue(key, out Chunk.Chunk c)) continue;
 
                 UnloadChunk(c);
@@ -109,7 +109,7 @@ namespace World.Loading
                 for (int y = centerChunk.y - LoadDistance; y <= centerChunk.y + LoadDistance; y++)
                 {
                     Coord cPos = new Coord(x, y);
-                    if (Helper.Dist(centerChunk, cPos) > LoadDistance) continue;
+                    if (centerChunk.Dist(cPos) > LoadDistance) continue;
                     if (_loadedChunks.ContainsKey(cPos.PackIntoLong())) continue;
 
                     LoadChunk(cPos);

@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62983a85802742958a3f550514f7f358, type: 3}
   m_Name: Grass
   m_EditorClassIdentifier: Assembly-CSharp::BlockSO
-  ID: 0
+  ID: 10
   blockName: Grass
-  textureIndex: 0
+  texture: {fileID: 2800000, guid: 3d30693c1aad14a189b9b93e162e665f, type: 3}
+  textureIndex: 1
   animated: 0
   animationFrameCount: 1
   animationFPS: 1
@@ -22,4 +23,5 @@ MonoBehaviour:
   drops: []
   solid: 0
   replaceable: 0
-  blockScript: 1
+  blockScript: 10
+  customData: 0

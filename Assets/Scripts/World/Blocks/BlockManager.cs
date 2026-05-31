@@ -12,24 +12,29 @@ namespace World.Blocks
 {
     public class BlockManager : AppModule
     {
-        [SerializeField] public BlockType[] types;
         private ChunkLoadManager _loadManager;
+        
+        [SerializeField] public BlockTypeCollection typeCollection;
+        [HideInInspector] public BlockType[] types;
+        private Dictionary<int, int> typeIDToIndex;
 
         private void Start()
         {
             _loadManager = App.App.Get<ChunkLoadManager>();
-            int i = 0;
-            foreach (BlockType t in types)
+            
+            types = typeCollection.types;
+
+            typeIDToIndex = new Dictionary<int, int>();
+            for (int i = 0; i < types.Length; i++)
             {
-                t.textureIndex = i;
-                if (t.animated) i += t.animationFrameCount;
-                else i++;
+                typeIDToIndex.Add((int) types[i].ID, i);
+                // Debug.Log((int) types[i].ID + " -> " + i);
             }
         }
 
         public BlockType GetBlockType(BlockType.BlockTypeID id)
         {
-            return types[(int) id];
+            return types[GetIndex(id)];
         }
 
         public Block GetBlock(Coord c, bool ground)
@@ -128,6 +133,13 @@ namespace World.Blocks
         public Block NewBlock(BlockRecord r, bool inGround)
         {
             return new Block(r, inGround);
+        }
+
+        public int GetIndex(BlockType.BlockTypeID id)
+        {
+            if (!typeIDToIndex.TryGetValue((int)id, out int index)) Debug.LogError("Type ID " + id + " is not in mapping dictionary");
+
+            return index;
         }
     }
 }

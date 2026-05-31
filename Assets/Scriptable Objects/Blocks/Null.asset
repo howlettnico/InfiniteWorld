@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 62983a85802742958a3f550514f7f358, type: 3}
-  m_Name: Water
+  m_Name: Null
   m_EditorClassIdentifier: Assembly-CSharp::World.Blocks.BlockType
-  ID: 70
-  blockName: Water
-  texture: {fileID: 2800000, guid: 2036e7a765e2d45838b7a4e2c890d480, type: 3}
-  textureIndex: 8
-  animated: 1
-  animationFrameCount: 4
-  animationFPS: 3
+  ID: 0
+  blockName: Null
+  texture: {fileID: 2800000, guid: 3b180bff6d2b048298521c7f7b440442, type: 3}
+  textureIndex: 0
+  animated: 0
+  animationFrameCount: 1
+  animationFPS: 1
   rotatable: 0
   drops: []
   solid: 0

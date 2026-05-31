@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62983a85802742958a3f550514f7f358, type: 3}
   m_Name: Large Grass
   m_EditorClassIdentifier: Assembly-CSharp::World.Blocks.BlockType
-  ID: 3
+  ID: 40
   blockName: Large Grass
+  texture: {fileID: 2800000, guid: 97c25659cb9714ebe9050ae5f147eebb, type: 3}
   textureIndex: 3
   animated: 0
   animationFrameCount: 1
@@ -23,3 +24,4 @@ MonoBehaviour:
   solid: 0
   replaceable: 1
   blockScript: 0
+  customData: 0
