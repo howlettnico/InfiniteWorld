@@ -9,12 +9,14 @@ namespace World.Chunk
 {
     public class Chunk
     {
+        private BlockManager _blockManager;
+        
         public static readonly int ChunkSize = 16;
         private static readonly int blockCount = ChunkSize * ChunkSize;
         private Block[] _ground;
         private Block[] _aboveGround;
         public Coord ChunkPos;
-        private BlockManager _blockManager;
+        public bool save;
 
         public Chunk(Coord pos)
         {
@@ -45,6 +47,8 @@ namespace World.Chunk
         {
             Coord chunk = WorldToChunkInternal(world);
             (ground ? _ground : _aboveGround)[Inx(chunk.x, chunk.y)] = block;
+
+            save = save || block.save;
         }
         
         public bool TrySetBlock(Coord world, Block block, bool ground)
@@ -53,6 +57,8 @@ namespace World.Chunk
             if (!(ground ? _ground : _aboveGround)[Inx(chunk.x, chunk.y)].type.replaceable) return false;
             
             (ground ? _ground : _aboveGround)[Inx(chunk.x, chunk.y)] = block;
+            
+            save = save || block.save;
 
             return true;
         }
@@ -102,10 +108,10 @@ namespace World.Chunk
                 for (int y = 0; y < ChunkSize; y++)
                 {
                     Block b = _ground[Inx(x, y)];
-                    if (b.record) ground.Add(b.GetRecord());
+                    if (b.save) ground.Add(b.GetRecord());
                     
                     Block b2 = _aboveGround[Inx(x, y)];
-                    if (b2.record) aboveGround.Add(b2.GetRecord());
+                    if (b2.save) aboveGround.Add(b2.GetRecord());
                 }
             }
 

@@ -32,8 +32,16 @@ namespace World.Save
 
         public void RecordChunk(Chunk.Chunk c)
         {
+            if (!c.save) return;
+            
             ChunkRecord r = c.GetRecord();
-            if (r.editedGroundBlocks.Length == 0 && r.editedAboveGroundBlocks.Length == 0) return; //dont save unedited chunks
+
+            if (r.editedGroundBlocks.Length == 0 && r.editedAboveGroundBlocks.Length == 0)
+            {
+                Debug.LogWarning("Block save var did not work correctly"); //dont save unedited chunks
+                return;
+            }
+
 
             long key = c.ChunkPos.PackIntoLong();
             

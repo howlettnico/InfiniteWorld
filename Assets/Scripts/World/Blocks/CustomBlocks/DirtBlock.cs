@@ -11,8 +11,12 @@ namespace World.Blocks.CustomBlocks
         public override void Update()
         {
             if (!block.inGround) return;
+
+            Block above = _blockManager.GetBlock(block.pos, false);
+
+            if (above.type.solid) return;
             
-            Block up = block._blockManager.GetBlock(block.pos + new Coord(0, 1), true);
+            Block up = _blockManager.GetBlock(block.pos + new Coord(0, 1), true);
             Block down = _blockManager.GetBlock(block.pos + new Coord(0, -1), true);
             Block left = _blockManager.GetBlock(block.pos + new Coord(-1, 0), true);
             Block right = _blockManager.GetBlock(block.pos + new Coord(1, 0), true);

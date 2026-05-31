@@ -14,6 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::World.Blocks.BlockType
   ID: 2
   blockName: Air
+  textureIndex: 2
+  animated: 0
+  animationFrameCount: 1
+  animationFPS: 1
+  rotatable: 0
   drops: []
   solid: 0
   replaceable: 1
+  blockScript: 0
+  customData: 0

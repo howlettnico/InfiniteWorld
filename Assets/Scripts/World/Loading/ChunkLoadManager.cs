@@ -64,7 +64,6 @@ namespace World.Loading
 
             LoadedChunks = _loadedChunks.Count;
         }
-        
 
         // ***** General Unloading and Loading *****
 

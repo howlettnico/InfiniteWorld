@@ -19,12 +19,12 @@ namespace World.Blocks
         public BlockType type;
         public Coord pos;
         public bool inGround;
-        public bool record;
+        public bool save;
         public bool rotated;
         public bool custom;
         public CustomBlock blockScript;
 
-        public Block(BlockType type, Coord pos, bool inGround, bool rotated, bool record, CustomBlock.BlockData d = null)
+        public Block(BlockType type, Coord pos, bool inGround, bool rotated, bool save, CustomBlock.BlockData d = null)
         {
             _itemManager = App.App.Get<ItemManager>();
             _blockManager = App.App.Get<BlockManager>();
@@ -32,7 +32,7 @@ namespace World.Blocks
             this.type = type;
             this.pos = pos;
             this.inGround = inGround;
-            this.record = record;
+            this.save = save;
             this.rotated = rotated;
             custom = type.blockScript != BlockType.BlockScript.None;
 
@@ -49,7 +49,7 @@ namespace World.Blocks
             type = _blockManager.GetBlockType(r.ID);
             pos = r.pos;
             this.inGround = inGround;
-            record = true;
+            save = true;
             rotated = r.rotated;
             custom = type.blockScript != BlockType.BlockScript.None;
 

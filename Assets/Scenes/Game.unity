@@ -151,7 +151,8 @@ MonoBehaviour:
   loadedChunksDebugColor: {r: 0.83989704, g: 0.5235849, b: 1, a: 1}
   radiusDisplayObject: {fileID: 1138473245}
   colliderParentObject: {fileID: 686585895}
-  <LoadDistance>k__BackingField: 4
+  individualColliders: 1
+  <LoadDistance>k__BackingField: 3
   LoadedChunks: 0
 --- !u!4 &77452404
 Transform:
@@ -219,6 +220,7 @@ MonoBehaviour:
   ground: 0
 --- !u!212 &472635601
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -264,6 +266,7 @@ SpriteRenderer:
   m_SortingLayerID: 197369629
   m_SortingLayer: -1
   m_SortingOrder: 1
+  m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -273,7 +276,6 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &514196747
 GameObject:
@@ -809,6 +811,7 @@ GameObject:
   m_IsActive: 0
 --- !u!212 &1138473246
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -854,6 +857,7 @@ SpriteRenderer:
   m_SortingLayerID: -166835539
   m_SortingLayer: -2
   m_SortingOrder: 1
+  m_MaskInteraction: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
   m_Color: {r: 1, g: 0.97360104, b: 0.56078434, a: 1}
   m_FlipX: 0
@@ -863,7 +867,6 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!4 &1138473247
 Transform:
@@ -930,6 +933,7 @@ MonoBehaviour:
   ground: 1
 --- !u!212 &1228350190
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -975,6 +979,7 @@ SpriteRenderer:
   m_SortingLayerID: 197369629
   m_SortingLayer: -1
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -984,7 +989,6 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &1263969985
 GameObject:
@@ -1005,6 +1009,7 @@ GameObject:
   m_IsActive: 1
 --- !u!212 &1263969986
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1050,6 +1055,7 @@ SpriteRenderer:
   m_SortingLayerID: -166835539
   m_SortingLayer: -2
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
   m_Color: {r: 0.8901961, g: 0.56078434, b: 1, a: 1}
   m_FlipX: 0
@@ -1059,7 +1065,6 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!4 &1263969987
 Transform:
@@ -1189,6 +1194,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22b8c5f1b6e64da986e74d6e3464b9c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::World.Save.SaveManager
+  savedChunksDebugColor: {r: 1, g: 0.72638464, b: 0, a: 1}
   savedChunks: 0
 --- !u!4 &1451782989
 Transform:
