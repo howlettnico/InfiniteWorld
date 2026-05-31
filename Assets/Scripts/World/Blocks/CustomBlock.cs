@@ -5,9 +5,12 @@ namespace World.Blocks.CustomBlocks
         // Override this if there is custom block data
         public abstract record BlockData;
         
-        // Variables
+        // Constant Variables
         public BlockManager _blockManager;
         public Block block;
+        
+        //Updatable Variables
+        public virtual bool needsUpdate => false; //override this if the block needs to be updated
 
         public CustomBlock(Block b)
         {

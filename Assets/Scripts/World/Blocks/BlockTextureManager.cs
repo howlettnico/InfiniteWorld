@@ -8,53 +8,89 @@ namespace World.Blocks
 {
     public static class BlockTextureManager
     {
-        public static int textureWidth = 8;
+        public static int textureSize = 8;
 
         public static void UpdateCombinedTexture(BlockTypeCollection c)
         {
-            int texturePixelCount = textureWidth * textureWidth;
+            int texturePixelCount = textureSize * textureSize;
             
             //loading types
             BlockType[] types = c.types;
 
             //Counting # of textures
-            int textures = 1;
+            int totalTextures = 1, currentTexture = 1;
             foreach (BlockType type in types)
             {
-                textures += type.animated ? type.animationFrameCount : 1;
+                int start = currentTexture;
+                foreach (BlockType.BlockState state in type.states)
+                {
+                    currentTexture = start + state.baseTextureIndex;
+                    totalTextures = Math.Max(totalTextures, 
+                        currentTexture + (state.animated ? state.animationFrameCount : 1));
+                }
+
+                currentTexture = totalTextures;
             }
 
             //Creating Texture
-            Texture2DArray texArray = new Texture2DArray(textureWidth, textureWidth, textures, TextureFormat.RGBA32, false);
+            Texture2DArray texArray = new Texture2DArray(textureSize, textureSize, totalTextures, TextureFormat.RGBA32, false);
             texArray.wrapMode = TextureWrapMode.Clamp;
             texArray.filterMode = FilterMode.Point;
 
             //Writing null texture
             Color[] nullColors = c.nullType.texture.GetPixels();
             texArray.SetPixels(nullColors, 0);
-            c.nullType.textureIndex = 0;
+            c.nullType.states[0].trueTextureIndex = 0;
             
             //Writing rest of textures
-            int textureI = 1;
+            int textureI = 1, maxTextureI = 1;
             for (int typeI = 0; typeI < types.Length; typeI++)
             {
                 BlockType type = types[typeI];
                 Color[] colors = type.texture.GetPixels();
+                int numTextures = type.texture.height / textureSize;
                 
-                //Setting texture index
-                type.textureIndex = textureI;
-                // Debug.Log(type.name + " " + type.textureIndex);
+                Debug.Log(type.name);
 
-                for (int frameI = 0; frameI < (type.animated ? type.animationFrameCount : 1); frameI++)
+                int start = maxTextureI;
+
+                for (int stateI = 0; stateI < type.states.Length; stateI++)
                 {
-                    int startI = type.animated ? type.animationFrameCount - frameI - 1: frameI;
-                    int endI = type.animated ? type.animationFrameCount - frameI : frameI + 1;
-                    Color[] colorsSub = colors[(startI * texturePixelCount)..(endI * texturePixelCount)];
-                    // Debug.Log(frameI +") " + (startI * texturePixelCount) + " -> " + (endI * texturePixelCount));
+                    BlockType.BlockState state = type.states[stateI];
 
-                    texArray.SetPixels(colorsSub, textureI);
+                    textureI = start + state.baseTextureIndex;
+                    
+                    //Setting texture index
+                    state.trueTextureIndex = textureI;
+                    
+                    // Debug.Log(stateI + ") An: " + state.animated + " FC: " + state.animationFrameCount + " BI:" + state.baseTextureIndex + " TI: " + state.trueTextureIndex);
 
-                    textureI++;
+                    for (int frameI = 0; frameI < (state.animated ? state.animationFrameCount : 1); frameI++)
+                    {
+                        Debug.Log("Frame: " + frameI + " Tex: " + textureI + "/" + maxTextureI);
+                        //Skipping if texture has already been drawn
+                        if (textureI < maxTextureI)
+                        {
+                            Debug.Log("Skipped");
+                            textureI++;
+                            continue;
+                        }
+
+                        int stateTexI = state.baseTextureIndex + frameI;
+                        int startI = numTextures - stateTexI - 1;
+                        int endI = numTextures - stateTexI;
+                        
+                        // int startI = state.animated ? state.animationFrameCount - (state.baseTextureIndex + frameI) - 1 : state.baseTextureIndex + frameI;
+                        // int endI = state.animated ? state.animationFrameCount - (state.baseTextureIndex + frameI) : state.baseTextureIndex + frameI + 1;
+                        Color[] texColors = colors[(startI * texturePixelCount)..(endI * texturePixelCount)];
+                        // Debug.Log(frameI +") " + (startI * texturePixelCount) + " -> " + (endI * texturePixelCount));
+
+                        texArray.SetPixels(texColors, textureI);
+
+                        textureI++;
+                    }
+
+                    maxTextureI = Math.Max(maxTextureI, textureI);
                 }
             }
             

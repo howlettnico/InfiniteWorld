@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Player;
 using UnityEngine;
@@ -9,7 +10,7 @@ namespace Custom_Rendering.World.Blocks
 {
     public class BlockPlaneRenderer : MonoBehaviour
     {
-        private struct BlockTypeRenderData
+        private struct BlockStateRenderData
         {
             public int texIndex;
             public int animated; // 0 false, 1 is true
@@ -19,24 +20,26 @@ namespace Custom_Rendering.World.Blocks
 
         private struct BlockRenderData
         {
-            public int typeI;
+            public int stateI;
             public int rotated;
         }
         
         private static readonly int WidthNameID = Shader.PropertyToID("_Width");
         private static readonly int HeightNameID = Shader.PropertyToID("_Height");
         private static readonly int BlockDataBufferNameID = Shader.PropertyToID("_BlockDataBuffer");
-        private static readonly int BlockTypeDataBufferNameID = Shader.PropertyToID("_BlockTypeDataBuffer");
+        private static readonly int BlockStateDataBufferNameID = Shader.PropertyToID("_BlockStateDataBuffer");
         
         private Renderer _rend;
         private MaterialPropertyBlock _propBlock;
         [SerializeField] private int width = 1, height = 1;
         private GraphicsBuffer _blockDataBuffer;
-        private GraphicsBuffer _blockTypeDataBuffer;
+        private GraphicsBuffer _blockStateDataBuffer;
         private BlockManager _blockManager;
         [SerializeField] private bool ground;
-        private BlockTypeRenderData[] _types;
+        private BlockStateRenderData[] _states;
         private BlockRenderData[] _blockData = Array.Empty<BlockRenderData>();
+
+        private Dictionary<long, int> typeIDAndStateToStateIndex = new Dictionary<long, int>();
 
 
         // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -48,34 +51,43 @@ namespace Custom_Rendering.World.Blocks
             _propBlock = new MaterialPropertyBlock();
 
             //writing to types buffer (+ 1 to account for null)
-            _types = new BlockTypeRenderData[_blockManager.NumTypes() + 1];
-            _types[0] = new BlockTypeRenderData(); //null type (everything getting set to 0 works)
+            _states = new BlockStateRenderData[_blockManager.numStates + 1];
+            _states[0] = new BlockStateRenderData(); //null type (everything getting set to 0 works)
             
             int i = 1;
             foreach (BlockType t in _blockManager.types)
             {
-                _types[i] = new BlockTypeRenderData()
+                int sI = 0;
+                foreach (BlockType.BlockState s in t.states)
                 {
-                    texIndex = t.textureIndex,
-                    animated = t.animated ? 1 : 0,
-                    numFrames = t.animationFrameCount,
-                    fps = t.animationFPS
-                };
-                
-                i++;
+                    _states[i] = new BlockStateRenderData()
+                    {
+                        texIndex = s.trueTextureIndex,
+                        animated = s.animated ? 1 : 0,
+                        numFrames = s.animationFrameCount,
+                        fps = s.animationFPS
+                    };
+
+                    typeIDAndStateToStateIndex.Add(GetKey(t.ID, sI), i);
+                    typeIDAndStateToStateIndex.TryGetValue(GetKey(t.ID, sI), out int index);
+                    // Debug.Log(t.blockName + " " + sI + " " + index + ":" + i);
+
+                    i++;
+                    sI++;
+                }
             }
             
             //creating buffer
-            int stride = Marshal.SizeOf(typeof(BlockTypeRenderData));
-            _blockTypeDataBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, _types.Length, stride);
+            int stride = Marshal.SizeOf(typeof(BlockStateRenderData));
+            _blockStateDataBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, _states.Length, stride);
             
             //Setting data
-            _blockTypeDataBuffer.SetData(_types);
+            _blockStateDataBuffer.SetData(_states);
             
             //Sending to GPU
             _rend.GetPropertyBlock(_propBlock);
             
-            _propBlock.SetBuffer(BlockTypeDataBufferNameID, _blockTypeDataBuffer);
+            _propBlock.SetBuffer(BlockStateDataBufferNameID, _blockStateDataBuffer);
         
             _rend.SetPropertyBlock(_propBlock);
         }
@@ -88,10 +100,10 @@ namespace Custom_Rendering.World.Blocks
                 _blockDataBuffer = null;
             }
             
-            if (_blockTypeDataBuffer != null)
+            if (_blockStateDataBuffer != null)
             {
-                _blockTypeDataBuffer.Release();
-                _blockTypeDataBuffer = null;
+                _blockStateDataBuffer.Release();
+                _blockStateDataBuffer = null;
             }
         }
 
@@ -137,15 +149,16 @@ namespace Custom_Rendering.World.Blocks
 
                     Block b = _blockManager.GetBlock(world, ground);
 
-
                     _blockData[i] = b == null ? 
                         new BlockRenderData
-                            {typeI = 0, rotated = 0}: 
+                            {stateI = 0, rotated = 0}: 
                         new BlockRenderData
                             {
-                                typeI = _blockManager.GetIndex(b.type.ID) + 1, // + 1 to account for null texture
+                                stateI = GetStateIndex(b.type.ID, b.state),
                                 rotated = b.rotated ? 1 : 0
                             };
+                    
+                    // Debug.Log(b.type.blockName + " " + _blockData[i].typeI);
                 }
             }
             _blockDataBuffer.SetData(_blockData);
@@ -159,6 +172,20 @@ namespace Custom_Rendering.World.Blocks
         
             _rend.SetPropertyBlock(_propBlock);
             
+        }
+
+        private int GetStateIndex(BlockType.BlockTypeID id, int state)
+        {
+            if (!typeIDAndStateToStateIndex.TryGetValue(GetKey(id, state), out int index)) Debug.LogError("ID: " + id + " with State" + state + " does not exist");
+
+            return index;
+        }
+
+        private long GetKey(BlockType.BlockTypeID id, int state)
+        {
+            Coord c = new Coord((int)id, state);
+            
+            return c.PackIntoLong();
         }
     }
 }

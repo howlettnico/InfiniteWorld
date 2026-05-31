@@ -62,13 +62,13 @@ namespace Player
         
         public void PlaceGround(BlockType.BlockTypeID id)
         {
-            _blockManager.SetBlock(pos, _blockManager.NewBlock(id, pos, true, false, true), true);
+            _blockManager.SetBlock(pos, _blockManager.NewBlock(id, pos, true, false, 0, true), true);
         }
         
         public bool TryPlace(BlockType.BlockTypeID id, bool rotated = false)
         {
             Coord p = FocusedCoord();
-            return _blockManager.TrySetBlock(p, _blockManager.NewBlock(id, p, false, rotated, true), false);
+            return _blockManager.TrySetBlock(p, _blockManager.NewBlock(id, p, false, rotated, 0, true), false);
         }
         
         public void BreakGround()

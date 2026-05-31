@@ -17,6 +17,7 @@ namespace World.Blocks
         [SerializeField] public BlockTypeCollection typeCollection;
         [HideInInspector] public BlockType[] types;
         private Dictionary<int, int> typeIDToIndex;
+        public int numStates;
 
         private void Start()
         {
@@ -29,6 +30,7 @@ namespace World.Blocks
             {
                 typeIDToIndex.Add((int) types[i].ID, i);
                 // Debug.Log((int) types[i].ID + " -> " + i);
+                numStates += types[i].states.Length;
             }
         }
 
@@ -89,7 +91,7 @@ namespace World.Blocks
         {
             return types.Length;
         }
-        
+
         /// <summary>
         /// Creates a new block of given type with saved block data
         /// </summary>
@@ -97,13 +99,14 @@ namespace World.Blocks
         /// <param name="pos">World position of block</param>
         /// <param name="inGround">Whether or not the block is in the ground layer</param>
         /// <param name="rotated">Whether or not the block is rotated</param>
+        /// <param name="state">Block State</param>
         /// <param name="save">Whether or not the block should be recorded</param>
         /// <param name="data">Saved block data</param>
         /// <returns>A new Block of given type</returns>
         /// <exception cref="Exception">When the desired block type has not been assigned</exception>
-        public Block NewBlock(BlockType type, Coord pos, bool inGround, bool rotated, bool save, CustomBlock.BlockData data = null)
+        public Block NewBlock(BlockType type, Coord pos, bool inGround, bool rotated, int state, bool save, CustomBlock.BlockData data = null)
         {
-            return new Block(type, pos, inGround, rotated, save, data);
+            return new Block(type, pos, inGround, rotated, state, save, data);
         }
 
         /// <summary>
@@ -113,14 +116,15 @@ namespace World.Blocks
         /// <param name="pos">World position of block</param>
         /// <param name="inGround">Whether or not the block is in the ground layer</param>
         /// <param name="rotated">Whether or not the block is rotated</param>
+        /// <param name="state">Block state</param>
         /// <param name="save">Whether or not the block should be recorded</param>
         /// <param name="data">Saved block data</param>
         /// <returns>A new Block of given type</returns>
         /// <exception cref="Exception">When the desired block type has not been assigned</exception>
-        public Block NewBlock(BlockType.BlockTypeID typeID, Coord pos, bool inGround, bool rotated, bool save, CustomBlock.BlockData data = null)
+        public Block NewBlock(BlockType.BlockTypeID typeID, Coord pos, bool inGround, bool rotated, int state, bool save, CustomBlock.BlockData data = null)
         {
             BlockType type = GetBlockType(typeID);
-            return NewBlock(type, pos, inGround, rotated, save, data);
+            return NewBlock(type, pos, inGround, rotated, state, save, data);
         }
 
         /// <summary>
