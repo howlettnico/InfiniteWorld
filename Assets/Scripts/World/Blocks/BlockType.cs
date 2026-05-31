@@ -32,7 +32,7 @@ namespace World.Blocks
 
                 public enum BlockScript
                 {
-                        Normal = 0,
+                        None = 0,
                         Grass = 1,
                         Dirt = 2
                 }

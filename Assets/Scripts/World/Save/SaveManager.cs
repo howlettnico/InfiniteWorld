@@ -11,6 +11,8 @@ namespace World.Save
 {
     public class SaveManager : AppModule
     {
+        public Color savedChunksDebugColor;
+        
         [SerializeField] private int savedChunks = 0;
         public Dictionary<long, ChunkRecord> chunks = new Dictionary<long, ChunkRecord>();
         private ChunkLoadManager _chunkLoadManager;

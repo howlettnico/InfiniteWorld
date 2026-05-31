@@ -29,12 +29,14 @@ namespace World.Chunk
         {
             foreach (Block b in _ground)
             {
-                b.Update();
+                if (!b.custom) continue;
+                b.blockScript.Update();
             }
             
             foreach (Block b in _aboveGround)
             {
-                b.Update();
+                if (!b.custom) continue;
+                b.blockScript.Update();
             }
         }
 
@@ -70,7 +72,7 @@ namespace World.Chunk
             Coord chunk = WorldToChunkInternal(world);
             Inventory i = (ground ? _ground : _aboveGround)[Inx(chunk.x, chunk.y)].Break();
             
-            SetBlock(world, _blockManager.NewBlock(BlockType.BlockTypeID.Air, world, false, true), ground);
+            SetBlock(world, _blockManager.NewBlock(BlockType.BlockTypeID.Air, world, false, true, true), ground);
             
             return i;
         }

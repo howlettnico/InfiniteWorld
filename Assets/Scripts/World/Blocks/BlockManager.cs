@@ -96,16 +96,9 @@ namespace World.Blocks
         /// <param name="data">Saved block data</param>
         /// <returns>A new Block of given type</returns>
         /// <exception cref="Exception">When the desired block type has not been assigned</exception>
-        public Block NewBlock(BlockType type, Coord pos, bool inGround, bool rotated, bool record, Block.BlockData data)
+        public Block NewBlock(BlockType type, Coord pos, bool inGround, bool rotated, bool record, CustomBlock.BlockData data)
         {
-            //Select the correct block type using type
-            return type.blockScript switch
-            {
-                BlockType.BlockScript.Normal => new Block(type, pos, inGround, rotated, record, data),
-                BlockType.BlockScript.Grass  => new GrassBlock(type, pos, inGround, rotated, record, data),
-                BlockType.BlockScript.Dirt  => new DirtBlock(type, pos, inGround, rotated, record, data),
-                _ => throw new Exception($"Custom Script {type.blockScript} is not assigned")
-            };
+            return new Block(type, pos, inGround, rotated, record, data);
         }
         
         /// <summary>
@@ -120,14 +113,7 @@ namespace World.Blocks
         /// <exception cref="Exception">When the desired block type has not been assigned</exception>
         public Block NewBlock(BlockType type, Coord pos, bool inGround, bool rotated, bool record)
         {
-            //Select the correct block type using type
-            return type.blockScript switch
-            {
-                BlockType.BlockScript.Normal => new Block(type, pos, inGround, rotated, record),
-                BlockType.BlockScript.Grass  => new GrassBlock(type, pos, inGround, rotated, record),
-                BlockType.BlockScript.Dirt  => new DirtBlock(type, pos, inGround, rotated, record),
-                _ => throw new Exception($"Custom Script {type.blockScript} is not assigned")
-            };
+            return new Block(type, pos, inGround, rotated, record);
         }
         
         /// <summary>
@@ -140,9 +126,8 @@ namespace World.Blocks
         /// <param name="record">Whether or not the block should be recorded</param>
         /// <returns>A new Block of given type</returns>
         /// <exception cref="Exception">When the desired block type has not been assigned</exception>
-        public Block NewBlock(BlockType.BlockTypeID typeID, Coord pos, bool inGround, bool rotated, bool record = false)
+        public Block NewBlock(BlockType.BlockTypeID typeID, Coord pos, bool inGround, bool rotated, bool record)
         {
-            //Select the correct block type using type
             BlockType type = GetBlockType(typeID);
             return NewBlock(type, pos, inGround, rotated, record);
         }
@@ -156,13 +141,7 @@ namespace World.Blocks
         /// <exception cref="Exception">When the desired block type has not been assigned</exception>
         public Block NewBlock(BlockRecord r, bool inGround)
         {
-            return GetBlockType(r.ID).blockScript switch
-            {
-                BlockType.BlockScript.Normal => new Block(r, inGround),
-                BlockType.BlockScript.Grass  => new GrassBlock(r, inGround),
-                BlockType.BlockScript.Dirt  => new DirtBlock(r, inGround),
-                _ => throw new Exception($"Custom Script {GetBlockType(r.ID).blockScript} is not assigned")
-            };
+            return new Block(r, inGround);
         }
 
         
