@@ -16,6 +16,13 @@ namespace World.Loading
 {
     public class ChunkLoadManager : AppModule
     {
+        public enum ColliderMethod
+        {
+            Individual = 0,
+            Merging = 1,
+            Varied = 2
+        }
+
         // ***** Managers ***** 
         private BlockManager _blockManager;
         private SaveManager _saveManager;
@@ -25,7 +32,7 @@ namespace World.Loading
         
         [SerializeField] private GameObject radiusDisplayObject;
         [SerializeField] private GameObject colliderParentObject;
-        [SerializeField] private bool individualColliders = false;
+        [SerializeField] private ColliderMethod colliderMethod = ColliderMethod.Varied;
         [field:SerializeField] public int LoadDistance { get; private set; }
         public Dictionary<long, Chunk.Chunk> _loadedChunks = new Dictionary<long, Chunk.Chunk>();
         public Dictionary<long, GameObject> _loadedColliders = new Dictionary<long, GameObject>();
@@ -154,40 +161,106 @@ namespace World.Loading
             int width = aboveGroundSolids.Length;
             int height = aboveGroundSolids[0].Length;
 
-            for (int x = 0; x < width; x++)
+            if (colliderMethod == ColliderMethod.Varied)
             {
-                for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
                 {
-                    Coord offset = new Coord(x, y);
-                    Coord world = chunkOrigin + offset;
-                    
-                    bool solid = aboveGroundSolids[x][y];
-                    if (!solid) continue;
-
-                    if (individualColliders)
+                    for (int y = 0; y < height; y++)
                     {
-                        int neighbors = 0;
+                        Coord offset = new Coord(x, y);
+                        Coord world = chunkOrigin + offset;
 
-                        neighbors += x - 1 < 0 ? 0 : (aboveGroundSolids[x - 1][y] ? 1 : 0);
-                        neighbors += x + 1 >= width ? 0 : (aboveGroundSolids[x + 1][y] ? 1 : 0);
-                        neighbors += y - 1 < 0 ? 0 : (aboveGroundSolids[x][y - 1] ? 1 : 0);
-                        neighbors += y + 1 >= height ? 0 : (aboveGroundSolids[x][y + 1] ? 1 : 0);
+                        bool solid = aboveGroundSolids[x][y];
+                        if (!solid) continue;
 
-                        if (neighbors == 4) continue;
+                        int w = 1, h = 1;
 
-                        GameObject o = new GameObject("Block", typeof(BoxCollider2D));
+                        int f = 0;
+                        bool expanding = true;
+                        while (expanding && f < 1000)
+                        {
+                            f++;
+                            
+                            //expanding to the right
+                            bool rightExpansionWorks = x + w < width;
+                            for (int y1 = 0; y1 < h && rightExpansionWorks; y1++)
+                            {
+                                if (!aboveGroundSolids[x + w][y + y1]) rightExpansionWorks = false;
+                            }
+                            
+                            //expanding up
+                            bool upExpansionWorks = y + h < height;
+                            for (int x1 = 0; x1 < w && upExpansionWorks; x1++)
+                            {
+                                if (!aboveGroundSolids[x + x1][y + h]) upExpansionWorks = false;
+                            }
+                            
+                            //deciding on expansion
+                            if (rightExpansionWorks && (h > w || !upExpansionWorks)) w++;
+                            else if (upExpansionWorks) h++;
+                            
+                            //updating expanding
+                            expanding = rightExpansionWorks || upExpansionWorks;
+                        }
+                        
+                        if (f == 1000) Debug.LogError("Collider Expansion Failed");
+                        
+                        //updating solid bitmap
+                        for (int x1 = 0; x1 < w; x1++)
+                        {
+                            for (int y1 = 0; y1 < h; y1++)
+                            {
+                                aboveGroundSolids[x + x1][y + y1] = false;
+                            }
+                        }
+                        
+                        //spawning in 
+                        GameObject o = new GameObject("Block Collider");
+                        BoxCollider2D b = o.AddComponent<BoxCollider2D>();
                         o.transform.SetParent(holder.transform);
-                        o.transform.position = new Vector2(world.x + 0.5f, world.y + 0.5f);
-                    }
-                    else //Merging colliders
-                    {
-                        BoxCollider2D b = holder.AddComponent<BoxCollider2D>();
-                        b.compositeOperation = Collider2D.CompositeOperation.Merge;
-                        b.offset = new Vector2(x + 0.5f, y + 0.5f);
+                        o.transform.position = new Vector2(world.x + w * 0.5f, world.y + h * 0.5f);
+                        b.size = new Vector2(w, h);
                     }
                 }
             }
-            
+            else
+            {
+                //simplifying solids
+                for (int x = 0; x < width; x++)
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        Coord offset = new Coord(x, y);
+                        Coord world = chunkOrigin + offset;
+
+                        bool solid = aboveGroundSolids[x][y];
+                        if (!solid) continue;
+
+                        if (colliderMethod == ColliderMethod.Individual)
+                        {
+                            int neighbors = 0;
+
+                            neighbors += x - 1 < 0 ? 0 : (aboveGroundSolids[x - 1][y] ? 1 : 0);
+                            neighbors += x + 1 >= width ? 0 : (aboveGroundSolids[x + 1][y] ? 1 : 0);
+                            neighbors += y - 1 < 0 ? 0 : (aboveGroundSolids[x][y - 1] ? 1 : 0);
+                            neighbors += y + 1 >= height ? 0 : (aboveGroundSolids[x][y + 1] ? 1 : 0);
+
+                            if (neighbors == 4) continue;
+
+                            GameObject o = new GameObject("Block Collider", typeof(BoxCollider2D));
+                            o.transform.SetParent(holder.transform);
+                            o.transform.position = new Vector2(world.x + 0.5f, world.y + 0.5f);
+                        }
+                        else if (colliderMethod == ColliderMethod.Merging)//Merging colliders
+                        {
+                            BoxCollider2D b = holder.AddComponent<BoxCollider2D>();
+                            b.compositeOperation = Collider2D.CompositeOperation.Merge;
+                            b.offset = new Vector2(x + 0.5f, y + 0.5f);
+                        }
+                    }
+                }
+            }
+
             //Generating geometry to avoid clipping
             // Physics2D.SyncTransforms();
             // CompositeCollider2D comp = holder.GetComponent<CompositeCollider2D>();
@@ -225,7 +298,7 @@ namespace World.Loading
             c.SetBlock(world, b, ground);
             
             //TODO make this not have to reload the entire chunk whenever a collider is added
-            LoadChunkColliders(c);
+            if (b.type.solid) LoadChunkColliders(c);
         }
         
         public bool TrySetBlock(Coord world, Block b, bool ground)

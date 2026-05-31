@@ -120,6 +120,7 @@ namespace World.Chunk
         
         // ***** Accessing Information *****
 
+        //TODO make this a bitmap using the bits in a list of ints
         public bool[][] GetAboveGroundSolids()
         {
             bool[][] aboveGroundSolids = Get2DArray<bool>();
