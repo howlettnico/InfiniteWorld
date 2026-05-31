@@ -201,8 +201,9 @@ namespace World.Loading
                             
                             //updating expanding
                             expanding = rightExpansionWorks || upExpansionWorks;
-
                         }
+                        
+                        if (f == 1000) Debug.LogError("Collider Expansion Failed");
                         
                         //updating solid bitmap
                         for (int x1 = 0; x1 < w; x1++)
@@ -214,10 +215,11 @@ namespace World.Loading
                         }
                         
                         //spawning in 
-                        GameObject o = new GameObject("Block Collider", typeof(BoxCollider2D));
+                        GameObject o = new GameObject("Block Collider");
+                        BoxCollider2D b = o.AddComponent<BoxCollider2D>();
                         o.transform.SetParent(holder.transform);
                         o.transform.position = new Vector2(world.x + w * 0.5f, world.y + h * 0.5f);
-                        o.transform.localScale = new Vector3(w, h, 1);
+                        b.size = new Vector2(w, h);
                     }
                 }
             }

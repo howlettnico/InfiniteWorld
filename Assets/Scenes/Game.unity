@@ -151,7 +151,7 @@ MonoBehaviour:
   loadedChunksDebugColor: {r: 0.83989704, g: 0.5235849, b: 1, a: 1}
   radiusDisplayObject: {fileID: 1138473245}
   colliderParentObject: {fileID: 686585895}
-  individualColliders: 1
+  colliderMethod: 2
   <LoadDistance>k__BackingField: 3
   LoadedChunks: 0
 --- !u!4 &77452404
@@ -1422,11 +1422,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 7871419538228371127, guid: c0990adfe072b455e91723b844e2d834, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 290
       objectReference: {fileID: 0}
     - target: {fileID: 7871419538228371127, guid: c0990adfe072b455e91723b844e2d834, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 7871419538228371127, guid: c0990adfe072b455e91723b844e2d834, type: 3}
       propertyPath: m_LocalPosition.z
