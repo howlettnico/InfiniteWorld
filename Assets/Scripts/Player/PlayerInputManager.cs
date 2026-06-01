@@ -24,6 +24,7 @@ namespace Player
             manager.OnPlayerMove += Move;
             manager.OnPlayerUse += Use;
             manager.OnPlayerInteract += Interact;
+            manager.OnPlayerDrop += Drop;
             manager.OnPlayerShift += Shift;
             manager.OnPlayerNumKeys += SelectSlot;
         }
@@ -34,6 +35,7 @@ namespace Player
             manager.OnPlayerMove -= Move;
             manager.OnPlayerUse -= Use;
             manager.OnPlayerInteract -= Interact;
+            manager.OnPlayerDrop -= Drop;
             manager.OnPlayerShift -= Shift;
             manager.OnPlayerNumKeys -= SelectSlot;
         }
@@ -54,6 +56,11 @@ namespace Player
             _player.Use(shift);
             // if (shift) _player.Place(BlockType.BlockTypeID.Air);
             // else _player.Place(BlockType.BlockTypeID.CedarLog);
+        }
+
+        private void Drop()
+        {
+            _player.Drop(shift);
         }
 
         private void Interact()
