@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4088a1ecbe194fbc8bb08a9a4e900199, type: 3}
-  m_Name: Cedar Log
+  m_Name: Chest
   m_EditorClassIdentifier: Assembly-CSharp::Features.Items.ItemType
-  ID: 10
-  itemName: Cedar Log
-  texture: {fileID: 3517239801109456915, guid: e03eaf837d9e348a69399a34893e19f1, type: 3}
+  ID: 0
+  itemName: 
+  texture: {fileID: -5281422124547630143, guid: d296a543fd8a941c1a26dccb0a770d36, type: 3}
   stackSize: 64
   placeable: 1
-  placedBlockID: 51
+  placedBlockID: 80

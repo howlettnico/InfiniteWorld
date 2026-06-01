@@ -47,14 +47,19 @@ namespace Entities.Items
             rb.angularVelocity = v;
         }
 
-        private void UpdateSprites()
+        private void UpdateSprites(bool completeReset = false)
         {
-            // Destroy(spriteHolder);
+            if (completeReset)
+            {
+                Destroy(spriteHolder);
 
-            // spriteHolder = new GameObject("Sprite Holder");
-            // spriteHolder.transform.SetParent(transform);
-            // spriteHolder.transform.position = transform.position;
-            
+                spriteHolder = new GameObject("Sprite Holder");
+                spriteHolder.transform.SetParent(transform);
+                spriteHolder.transform.position = transform.position;
+                
+                slotHolders.Clear();
+            }
+
             for (int sI = 0; sI < inventory.NumSlots; sI++)
             {
                 Slot s = inventory.slots[sI];
@@ -106,9 +111,11 @@ namespace Entities.Items
         {
             if (other.gameObject.TryGetComponent<Player.Player>(out Player.Player p))
             {
+                int numSlots = inventory.NumSlots;
                 inventory = p.TryAddToInventory(inventory, true);
 
                 if (inventory.Empty()) _entityManager.RemoveEntity(this);
+                else if (numSlots != inventory.NumSlots) UpdateSprites(true);
             }else if (other.gameObject.TryGetComponent<InventoryEntity>(out InventoryEntity e))
             {
                 if (e.inventory.Empty()) return;

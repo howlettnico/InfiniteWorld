@@ -9,7 +9,8 @@ namespace Features.Items
         public enum ItemTypeID
         {
             Null = 0,
-            CedarLog = 1
+            CedarLog = 10,
+            Chest = 20,
         }
 
         public ItemTypeID ID;

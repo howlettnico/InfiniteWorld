@@ -27,6 +27,7 @@ namespace Features.Items
             typeIDToIndex = new Dictionary<int, int>();
             for (int i = 0; i < types.Length; i++)
             {
+                // Debug.Log(types[i].ID + " "+ (int) types[i].ID + " " + i);
                 typeIDToIndex.Add((int) types[i].ID, i);
             }
         }

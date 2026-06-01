@@ -21,8 +21,9 @@ namespace Entities
 
         public void RemoveEntity(Entity e)
         {
+            if (e.removed) return;
             if (!loadedEntities.Remove(e)) Debug.LogError("Tried to remove entity that was not loaded");
-            
+            e.removed = true;
             Destroy(e.gameObject);
         }
     }
