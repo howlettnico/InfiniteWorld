@@ -23,7 +23,7 @@ MonoBehaviour:
     animationFPS: 1
   rotatable: 1
   drops:
-  - ID: 1
+  - ID: 10
     dropChance: 1
     minDropAmount: 1
     maxDropAmount: 1
