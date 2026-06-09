@@ -4,6 +4,7 @@ using Features.Items;
 using UnityEngine;
 using Utilities;
 using World.Blocks;
+using Vector2 = UnityEngine.Vector2;
 
 namespace Player
 {
@@ -23,6 +24,7 @@ namespace Player
         public Vector2 facing;
         public bool moving;
         public int selectedSlot = 1;
+        public float dropSpeed;
 
         public Vector2 pos {
             get {return transform.position;} 
@@ -43,7 +45,7 @@ namespace Player
             else rb.linearVelocity = Vector2.zero;
             // if (moving) pos += facing.normalized * (moveSpeed * Time.deltaTime);
         }
-        
+
         //***** Using *****
 
         public void Use(bool shift)
@@ -74,17 +76,48 @@ namespace Player
         public void BreakGround()
         {
             Coord p = FocusedCoord();
-            Inventory i = _blockManager.BreakBlock(p, true);
-            Inventory rem = inventory.TryAdd(i);
-            //TODO drop rem items on ground
+            _blockManager.BreakBlock(p, true);
         }
 
         public void Break()
         {
             Coord p = FocusedCoord();
-            Inventory i = _blockManager.BreakBlock(p, false);
+            _blockManager.BreakBlock(p, false);
+        }
+
+        public Inventory TryAddToInventory(Inventory i, bool returnRemainder)
+        {
             Inventory rem = inventory.TryAdd(i);
-            //TODO drop rem items on ground
+
+            if (returnRemainder) return rem;
+            
+            //TODO drop onto ground
+            return new Inventory();
+        }
+        
+        //***** Dropping *****
+
+        public void Drop(bool shift)
+        {
+            Slot s = GetSelectedSlot();
+            if (s.empty) return;
+
+            Vector2 dir = FocusOffset();
+            
+            Item item = s.item;
+            Inventory inv = new Inventory(1, true);
+            if (shift)
+            {
+                inv.TryAdd(item, s.count);
+                s.SetEmpty();
+            }
+            else
+            {
+                s.TryRemove(item);
+                inv.TryAdd(item);
+            }
+            
+            _itemManager.CreateInventoryEntity(inv, pos + dir, false, (Vector2) dir * dropSpeed + rb.linearVelocity);
         }
 
         //***** Helpers *****

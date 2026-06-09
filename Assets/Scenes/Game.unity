@@ -467,6 +467,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 25310d55-03f3-4dc5-961e-e978c704438f
     m_ActionName: 'Player/NumKeys[/Keyboard/1,/Keyboard/2,/Keyboard/3,/Keyboard/4,/Keyboard/5,/Keyboard/6,/Keyboard/7,/Keyboard/8,/Keyboard/9]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 514196749}
+        m_TargetAssemblyTypeName: Input.InputManager, Assembly-CSharp
+        m_MethodName: PlayerDrop
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 7b6a1c00-f20f-45ae-a949-76e44b749043
+    m_ActionName: 'Player/Drop[/Keyboard/q]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Keyboard&Mouse
   m_DefaultActionMap: 
@@ -591,9 +607,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04b82e25739e4145981f4d0e17c47a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Features.Items.ItemManager
+  typeCollection: {fileID: 11400000, guid: 48009fdf10b1544aeb13a949845719f3, type: 2}
   types:
   - {fileID: 11400000, guid: 720119c8213fd4f5d940139d865d427b, type: 2}
   - {fileID: 11400000, guid: b45e4cbb99b404ea3b26ffcc73018c66, type: 2}
+  inventoryEntityPrefab: {fileID: 7100611883227039228, guid: 5bf48e102c2be4d60be18f69e4631565, type: 3}
 --- !u!1 &1025299969
 GameObject:
   m_ObjectHideFlags: 0
@@ -1242,6 +1260,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::World.Blocks.BlockManager
   typeCollection: {fileID: 11400000, guid: 41b79205de870457dac01f097cda0aab, type: 2}
   types: []
+  numStates: 0
 --- !u!4 &1472771792
 Transform:
   m_ObjectHideFlags: 0
@@ -1251,6 +1270,51 @@ Transform:
   m_GameObject: {fileID: 1472771790}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2057033267}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1633452114
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1633452116}
+  - component: {fileID: 1633452115}
+  m_Layer: 0
+  m_Name: Entity Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1633452115
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1633452114}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8946c4b51c014c97be9bc2ced6e6acbe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Entities.EntityManager
+  loadedEntities: []
+--- !u!4 &1633452116
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1633452114}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1383,6 +1447,7 @@ MonoBehaviour:
   - {fileID: 514196749}
   - {fileID: 1451782988}
   - {fileID: 746211767}
+  - {fileID: 1633452115}
 --- !u!4 &2057033267
 Transform:
   m_ObjectHideFlags: 0
@@ -1403,6 +1468,7 @@ Transform:
   - {fileID: 746211766}
   - {fileID: 514196748}
   - {fileID: 1451782989}
+  - {fileID: 1633452116}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &2069292716
@@ -1415,11 +1481,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 7871419538228371127, guid: c0990adfe072b455e91723b844e2d834, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -290
       objectReference: {fileID: 0}
     - target: {fileID: 7871419538228371127, guid: c0990adfe072b455e91723b844e2d834, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 140
       objectReference: {fileID: 0}
     - target: {fileID: 7871419538228371127, guid: c0990adfe072b455e91723b844e2d834, type: 3}
       propertyPath: m_LocalPosition.z

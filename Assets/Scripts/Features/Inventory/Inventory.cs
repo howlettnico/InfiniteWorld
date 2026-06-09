@@ -84,5 +84,15 @@ namespace Features.Inventory
 
             return remainingInventory;
         }
+
+        public bool Empty()
+        {
+            foreach (Slot s in slots)
+            {
+                if (!s.empty) return false;
+            }
+
+            return true;
+        }
     }
 }

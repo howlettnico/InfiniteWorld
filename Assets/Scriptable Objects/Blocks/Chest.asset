@@ -27,7 +27,11 @@ MonoBehaviour:
     animationFrameCount: 1
     animationFPS: 1
   rotatable: 0
-  drops: []
+  drops:
+  - ID: 20
+    dropChance: 1
+    minDropAmount: 1
+    maxDropAmount: 1
   solid: 1
   replaceable: 0
   blockScript: 30

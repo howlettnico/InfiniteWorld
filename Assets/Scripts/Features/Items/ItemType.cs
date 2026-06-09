@@ -9,11 +9,13 @@ namespace Features.Items
         public enum ItemTypeID
         {
             Null = 0,
-            OakLog = 1
+            CedarLog = 10,
+            Chest = 20,
         }
 
         public ItemTypeID ID;
         public string itemName;
+        public Sprite texture;
         public int stackSize;
         public bool placeable;
         public BlockType.BlockTypeID placedBlockID;

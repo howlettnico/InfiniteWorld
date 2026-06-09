@@ -77,14 +77,12 @@ namespace World.Chunk
             return (ground ? _ground : _aboveGround)[Inx(chunk.x, chunk.y)];
         }
 
-        public Inventory BreakBlock(Coord world, bool ground)
+        public void BreakBlock(Coord world, bool ground)
         {
             Coord chunk = WorldToChunkInternal(world);
-            Inventory i = (ground ? _ground : _aboveGround)[Inx(chunk.x, chunk.y)].Break();
+            (ground ? _ground : _aboveGround)[Inx(chunk.x, chunk.y)].Break();
             
             SetBlock(world, _blockManager.NewBlock(BlockType.BlockTypeID.Air, world, false, true, 0, true), ground);
-            
-            return i;
         }
         
         // ***** Records *****

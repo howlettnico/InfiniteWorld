@@ -10,6 +10,7 @@ namespace Input
         public event Action<Vector2> OnPlayerMove;
         public event Action OnPlayerUse;
         public event Action OnPlayerInteract;
+        public event Action OnPlayerDrop;
         public event Action<bool> OnPlayerShift;
         public event Action<int> OnPlayerNumKeys;
 
@@ -26,6 +27,11 @@ namespace Input
         public void PlayerInteract(InputAction.CallbackContext context)
         {
             if (context.performed) OnPlayerInteract?.Invoke();
+        }
+        
+        public void PlayerDrop(InputAction.CallbackContext context)
+        {
+            if (context.performed) OnPlayerDrop?.Invoke();
         }
         
         public void PlayerShift(InputAction.CallbackContext context)
