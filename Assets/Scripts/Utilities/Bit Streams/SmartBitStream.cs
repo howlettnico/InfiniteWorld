@@ -51,10 +51,33 @@ namespace Utilities
         {
             return b.PackAndExport();
         }
+        
+        public void PackAndExport(int[] export)
+        {
+            b.PackAndExport(export);
+        }
 
         public override string ToString()
         {
             return b.ToString();
+        }
+
+        public void Clear()
+        {
+            b.Clear();
+            currentWriteLengthIndex = 0;
+            currentReadLengthIndex = 0;
+            currentReadBitIndex = 0;
+        }
+        
+        public int GetCount()
+        {
+            return b.GetCount();
+        }
+
+        public int GetSegmentLength()
+        {
+            return segmentLength;
         }
     }
 }

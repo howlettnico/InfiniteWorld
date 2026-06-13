@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Utilities.Bit_Streams
 {
@@ -13,6 +14,7 @@ namespace Utilities.Bit_Streams
         ///**
         public void AddBits(int numBits, int bits)
         {
+            // Debug.Log("NB: " + numBits + " B: " + bits + " CBI: " + currentBitIndex + " CAI: " + currentArrayIndex);
             //& 31 does the same as % 32
             //>>5 does the division by 32
 
@@ -56,7 +58,7 @@ namespace Utilities.Bit_Streams
             uint maskedOverflow = overflowMem & trueMask;
             uint shiftedOverflow = maskedOverflow << (numBits - numBits2);
             val |= shiftedOverflow;
-            
+
             return (int)val;
         }
         //**/
@@ -143,7 +145,7 @@ namespace Utilities.Bit_Streams
             return s.ToString();
         }
 
-        private static String ToBin(uint i)
+        public static String ToBin(uint i)
         {
             return Convert.ToString(i, 2).PadLeft(INT_SIZE, '0');
         }
@@ -153,6 +155,30 @@ namespace Utilities.Bit_Streams
             int[] export = new int[stream.Count + 1]; //adds extra padding 0 to end
             stream.CopyTo(export);
             return export;
+        }
+        
+        public void PackAndExport(int[] export)
+        {
+            if (export.Length != stream.Count + 1) Debug.LogError("Export size " + export.Length + " not big enough for stream size: " + stream.Count + 1);
+            stream.CopyTo(export);
+        }
+
+        public void Clear()
+        {
+            stream.Clear();
+            stream.Add(0);
+            currentBitIndex = 0;
+            currentArrayIndex = 0;
+        }
+
+        public int GetCount()
+        {
+            return stream.Count + 1; // + 1 to account for end buffer
+        }
+
+        public static int NumBits(int numStates)
+        {
+            return Mathf.CeilToInt(Mathf.Log(numStates, 2));
         }
     }
 }
