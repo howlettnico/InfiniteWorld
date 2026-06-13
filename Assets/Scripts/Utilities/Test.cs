@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using World.Chunk;
 
@@ -7,70 +8,48 @@ namespace Utilities
 {
     public class Test : MonoBehaviour
     {
-        // private BitStream b;
-        // private List<int> vals;
-        // private List<int> numBits;
-        // private int index;
-        // private int ii;
+        private SmartBitStream b;
+        private List<int> vals = new List<int>();
+        private List<int> vals1 = new List<int>();
 
         private void Start()
         {
+            b = new SmartBitStream(new []{1, 8});
+
+            for (int i = 0; i < 100; i++)
+            {
+                int v = UnityEngine.Random.Range(0, 2);
+                b.AddNext(v);
+                vals.Add(v);
+                int v1 = UnityEngine.Random.Range(0, 128);
+                b.AddNext(v1);
+                vals1.Add(v1);
+            }
+
+            StringBuilder s = new StringBuilder();
+            for (int i = 0; i < 100; i++)
+            {
+                int v = b.ReadNext();
+                s.Append("Val: " + vals[i] + " Saved: " + v + (vals[i] == v ? " " : "WOTNOGNONGONGONG") + "\n");
+                int v1 = b.ReadNext();
+                s.Append("Val1: " + vals1[i] + " Saved1: " + v1 + (vals1[i] == v1 ? " " : "WOTNOGNONGONGONG") + "\n\n");
+            }
+
+            s.Append("NEXT Test: \n");
+            for (int i = 0; i < 100; i++)
+            {
+                b.GoToSegment(i);
+                int v = b.ReadNext();
+                s.Append("Val: " + vals[i] + " Saved: " + v + (vals[i] == v ? " " : "WOTNOGNONGONGONG") + "\n");
+                int v1 = b.ReadNext();
+                s.Append("Val1: " + vals1[i] + " Saved1: " + v1 + (vals1[i] == v1 ? " " : "WOTNOGNONGONGONG") + "\n\n");
+            }
             
-            // b = new BitStream();
-            // vals = new List<int>();
-            // numBits = new List<int>();
-            //
-            // index = 0;
-            // ii = 0;
-            //
-            // for (int i = 0; i < 100; i++)
-            // {
-            //     int v = UnityEngine.Random.Range(0, 128);
-            //     int n = UnityEngine.Random.Range(8, 33);
-            //     vals.Add(v);
-            //     numBits.Add(n);
-            //     b.AddBits(n, v);
-            //     // Debug.Log(i + ") " + n + " -> " + v);
-            // }
-            //
-            // for (int i = 0; i < 100; i++)
-            // {
-            //     int n = numBits[ii];
-            //     int v = b.Read(index, n);
-            //     
-            //     if (v != vals[ii])Debug.Log(ii + ") " + v + " = " + vals[ii] + (v == vals[ii] ? "" : " WOMGG"));
-            //     // if (v != vals[ii]) return;
-            //     
-            //     index += n;
-            //     ii++;
-            // }
-            // Debug.Log("done: " + ii);
+            Debug.Log(s);
         }
 
         private void Update()
         {
-            // for (int i = 0; i < 100; i++)
-            // {
-            //     int v = UnityEngine.Random.Range(0, 128);
-            //     int n = UnityEngine.Random.Range(8, 33);
-            //     vals.Add(v);
-            //     numBits.Add(n);
-            //     b.AddBits(n, v);
-            //     // Debug.Log(i + ") " + n + " -> " + v);
-            // }
-            //
-            // for (int i = 0; i < 100; i++)
-            // {
-            //     int n = numBits[ii];
-            //     int v = b.Read(index, n);
-            //     
-            //     if (v != vals[ii])Debug.Log(ii + ") " + v + " = " + vals[ii] + (v == vals[ii] ? "" : " WOMGG"));
-            //     // if (v != vals[ii]) return;
-            //     
-            //     index += n;
-            //     ii++;
-            // }
-            // Debug.Log("done: " + ii);
         }
     }
 }

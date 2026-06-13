@@ -1,17 +1,66 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
-using UnityEngine;
 
-namespace Utilities
+namespace Utilities.Bit_Streams
 {
     public class BitStream
     {
-        private static int INT_SIZE = 32;
-        private List<uint> stream = new List<uint>(new uint[]{0});
+        private const int INT_SIZE = 32; // Only works for 32 bit unsigned integers
+        private List<int> stream = new List<int>(new int[]{0});
         private int currentBitIndex = 0;
         private int currentArrayIndex = 0;
+
+        ///**
+        public void AddBits(int numBits, int bits)
+        {
+            //& 31 does the same as % 32
+            //>>5 does the division by 32
+
+            uint mask = numBits == 32 ? 0xFFFFFFFFu : (1u << numBits) - 1;
+            uint maskedBits = (uint)bits & mask;//masking other bits to ensure it doesnt break
+            uint shiftedBits = maskedBits << (currentBitIndex & 31);
+            stream[currentArrayIndex] |= (int)shiftedBits;
+            currentBitIndex += numBits;
+            
+            if (currentBitIndex >> 5 != currentArrayIndex)
+            {
+                currentArrayIndex++;
+                int alreadyWrittenBits = numBits - (currentBitIndex & 31);
+                uint overflowBits = maskedBits >> alreadyWrittenBits;
+                uint overflowFinal = (currentBitIndex & 31) == 0 ? 0u : overflowBits; // adjusts it to 0 if there is nothing new to write
+                stream.Add((int) overflowFinal);
+            }
+        }
+
+        public int Read(int bitIndex, int numBits)
+        {
+            //& 31 does the same as % 32
+            //>>5 does the division by 32
+            
+            int arrayIndex = bitIndex >> 5;
+            int shiftAmount = bitIndex & 31;
+            uint mem = (uint) stream[arrayIndex];
+            uint mask = numBits == 32 ? 0xFFFFFFFFu : (1u << numBits) - 1;
+            uint shiftedMask = mask << shiftAmount;
+            uint shiftedVal = mem & shiftedMask;
+            uint val = shiftedVal >> shiftAmount;
+            
+            //Overflows into 2 bits (used to be an if but that is slower then just calculating it and adjusting it afterwards)
+            int actuallyOverflows = (((bitIndex + numBits) >> 5) - arrayIndex); // 1 if true, otherwise 0
+            int numBits2 = (bitIndex + numBits) & 31;
+            // the -1 from the mask is automatically correct when numBits2 = 0
+            int overflowArrayIndex = arrayIndex + 1 * actuallyOverflows; // gets the same if its not actually extended
+            uint overflowMem = (uint) stream[overflowArrayIndex];
+            uint overflowMask = (1u << numBits2) - 1;
+            uint trueMask = (uint)actuallyOverflows * overflowMask;
+            uint maskedOverflow = overflowMem & trueMask;
+            uint shiftedOverflow = maskedOverflow << (numBits - numBits2);
+            val |= shiftedOverflow;
+            
+            return (int)val;
+        }
+        //**/
+        
         
         /**
         public void AddBits(int numBits, int bits)
@@ -83,41 +132,6 @@ namespace Utilities
         }
         //**/
         
-        ///**
-        public void AddBits(int numBits, int bits)
-        {
-            //& 31 does the same as % 32
-            //>>5 does the division by 32
-            
-            uint b = (uint)bits & ((numBits == 32) ? 0xFFFFFFFFu : (1u << numBits) - 1);//masking other bits to ensure it doesnt break
-            stream[currentArrayIndex] |= b << (currentBitIndex & 31);
-            currentBitIndex += numBits;
-            if (currentBitIndex >> 5 != currentArrayIndex)
-            {
-                currentArrayIndex++;
-                stream.Add((currentBitIndex & 31) == 0 ? 0u : (uint)bits >> (numBits - (currentBitIndex & 31)));
-            }
-        }
-
-        public int Read(int bitIndex, int numBits)
-        {
-            //& 31 does the same as % 32
-            //>>5 does the division by 32
-            
-            int arrayIndex = bitIndex >> 5;
-            int shiftAmount = bitIndex & 31;
-            uint val = ((stream[arrayIndex] & (((numBits == 32) ? 0xFFFFFFFFu : (1u << numBits) - 1) << shiftAmount)) >> shiftAmount);
-            
-            //Extends over 2 ints
-            int extend = (((bitIndex + numBits) >> 5) - arrayIndex); // 1 if true, otherwise 0
-            int numBits2 = (bitIndex + numBits) & 31;
-            // the -1 from the mask is automatically correct when numBits2 = 0
-            val |= (stream[arrayIndex + 1 * extend] & ((uint)extend * ((1u << numBits2) - 1))) << (numBits - numBits2);
-            
-            return (int)val;
-        }
-        //**/
-        
         public override string ToString()
         {
             String s = "";
@@ -129,9 +143,16 @@ namespace Utilities
             return s.ToString();
         }
 
-        public static String ToBin(uint i)
+        private static String ToBin(uint i)
         {
             return Convert.ToString(i, 2).PadLeft(INT_SIZE, '0');
+        }
+
+        public int[] PackAndExport()
+        {
+            int[] export = new int[stream.Count + 1]; //adds extra padding 0 to end
+            stream.CopyTo(export);
+            return export;
         }
     }
 }
