@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Player;
 using UnityEngine;
@@ -39,7 +40,9 @@ namespace Custom_Rendering.World.Blocks
         private BlockStateRenderData[] _states;
         private BlockRenderData[] _blockData = Array.Empty<BlockRenderData>();
 
-        private Dictionary<long, int> typeIDAndStateToStateIndex = new Dictionary<long, int>();
+        // private Dictionary<long, int> typeIDAndStateToStateIndex = new Dictionary<long, int>();
+        private int[][] _stateIndexLookup; // [typeID][stateIndex] → stateI
+        
 
 
         // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -53,10 +56,14 @@ namespace Custom_Rendering.World.Blocks
             //writing to types buffer (+ 1 to account for null)
             _states = new BlockStateRenderData[_blockManager.numStates + 1];
             _states[0] = new BlockStateRenderData(); //null type (everything getting set to 0 works)
+
+
+            _stateIndexLookup = new int[Enum.GetValues(typeof(BlockType.BlockTypeID)).Cast<int>().Max() + 1][];
             
             int i = 1;
             foreach (BlockType t in _blockManager.types)
             {
+                _stateIndexLookup[(int)t.ID] = new int[t.states.Length];
                 int sI = 0;
                 foreach (BlockType.BlockState s in t.states)
                 {
@@ -68,9 +75,10 @@ namespace Custom_Rendering.World.Blocks
                         fps = s.animationFPS
                     };
 
-                    typeIDAndStateToStateIndex.Add(GetKey(t.ID, sI), i);
-                    typeIDAndStateToStateIndex.TryGetValue(GetKey(t.ID, sI), out int index);
+                    // typeIDAndStateToStateIndex.Add(GetKey(t.ID, sI), i);
+                    // typeIDAndStateToStateIndex.TryGetValue(GetKey(t.ID, sI), out int index);
                     // Debug.Log(t.blockName + " " + sI + " " + index + ":" + i);
+                    _stateIndexLookup[(int)t.ID][sI] = i;
 
                     i++;
                     sI++;
@@ -140,9 +148,9 @@ namespace Custom_Rendering.World.Blocks
             //Getting Block Information
             Coord topLeft = new Coord(pCoord.x - width / 2, pCoord.y - height / 2);
 
-            for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
             {
-                for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
                 {
                     int i = y * width + x;
                     Coord world = topLeft + new Coord(x, y);
@@ -176,9 +184,9 @@ namespace Custom_Rendering.World.Blocks
 
         private int GetStateIndex(BlockType.BlockTypeID id, int state)
         {
-            if (!typeIDAndStateToStateIndex.TryGetValue(GetKey(id, state), out int index)) Debug.LogError("ID: " + id + " with State" + state + " does not exist");
-
-            return index;
+            // if (!typeIDAndStateToStateIndex.TryGetValue(GetKey(id, state), out int index)) Debug.LogError("ID: " + id + " with State" + state + " does not exist");
+            
+            return _stateIndexLookup[(int)id][state];;
         }
 
         private long GetKey(BlockType.BlockTypeID id, int state)

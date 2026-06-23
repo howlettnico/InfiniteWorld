@@ -52,7 +52,7 @@ namespace World.Loading
             foreach (KeyValuePair<long, Chunk.Chunk> pair in _loadedChunks)
             {
                 Chunk.Chunk c = (Chunk.Chunk)pair.Value;
-                c.UpdateAllBlocks();
+                // c.UpdateAllBlocks();
             }
         }
 
