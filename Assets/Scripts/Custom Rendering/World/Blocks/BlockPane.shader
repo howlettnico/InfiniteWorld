@@ -1,4 +1,4 @@
-Shader "Unlit/UnlitShaderExample"
+Shader "Unlit/BlockPlane"
 {
     Properties //input
     {
