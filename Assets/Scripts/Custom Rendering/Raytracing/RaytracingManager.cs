@@ -209,7 +209,7 @@ public class RaytracingManager : MonoBehaviour
         raytracingShader.SetInt("worldWidth", worldWidth);
         raytracingShader.SetInt("worldHeight", worldHeight);
         raytracingShader.SetFloat("Time", Time.time);
-        raytracingShader.SetVector("Sun", new Vector4(pPos.x - topLeft.x, pPos.y - topLeft.y, 10, 0));
+        raytracingShader.SetVector("Sun", new Vector4(pPos.x - topLeft.x + sunPos.x, pPos.y - topLeft.y + sunPos.y, sunPos.z, 0));
         raytracingShader.SetBuffer(kernel, "_BlockDataBuffer", _blockDataBuffer);
         raytracingShader.Dispatch(kernel, texture.width / 8, texture.height / 8, 1);
     }
