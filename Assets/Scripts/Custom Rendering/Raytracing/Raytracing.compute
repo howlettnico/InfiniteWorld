@@ -1,12 +1,15 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CSMain
 
+//*********** Strucs ********
 struct BlockStateRenderData
 {
     int texIndex;
     int animated;
     int numFrames;
     float fps;
+    int solid;
+    
 };
 
 struct BlockRenderData
@@ -15,11 +18,26 @@ struct BlockRenderData
     int rotated;
 };
 
-// Create a RenderTexture with enableRandomWrite flag and set it
-// with cs.SetTexture
+struct Ray
+{
+    float3 origin;
+    float3 dir;
+    float3 inv;
+};
+
+struct HitInfo
+{
+    int error;
+    int collide;
+    float3 coord;
+    float3 pos;
+};
+
+float Time;
+float3 Sun;
+
 RWTexture2D<float4> Result;
 int textureWidth, textureHeight, worldWidth, worldHeight;
-float Time;
 
 StructuredBuffer<BlockRenderData> _BlockDataBuffer;
 StructuredBuffer<BlockStateRenderData> _BlockStateDataBuffer;
@@ -27,10 +45,106 @@ StructuredBuffer<BlockStateRenderData> _BlockStateDataBuffer;
 Texture2DArray<float4> _BlockTexs;
 SamplerState sampler_BlockTexs;
 
+//****** Getting Data ******
 int GetIndex(int x, int y, bool ground)
 {
     return y * worldWidth + x + (ground ? 0 : worldWidth * worldHeight);
 }
+
+int GetIndex(float3 c)
+{
+    //assumes z is only 1 or 0;
+    return c.y * worldWidth + c.x + (c.z == 0 ? 0 : worldWidth * worldHeight);
+}
+
+//****** Raytracing ******
+HitInfo Traverse(Ray r)
+{
+    HitInfo hit;
+    hit.error = 0;
+    hit.collide = 0;
+    hit.coord = float3(0, 0, 0);
+    hit.pos = float3(0, 0, 0);
+    
+    float3 coord = floor(r.origin);
+
+    //******TODO******* replace with AABB collision
+    //exited available area
+    if (coord.x < 0 || coord.x > worldWidth || coord.y < 0 || coord.y > worldHeight || coord.z < 0 || coord.z > 1)
+    {
+        hit.collide = 0; // false
+        return hit;
+    }
+
+    //Step direction based on sign of ray direction
+    const float3 step = sign(r.inv); //use inverse instead of dir bc of floating point
+    const float3 delta = abs(r.inv);
+
+    //Finding xyz planes to collide with
+    //  the origin could currently be anywhere within the voxel
+    //  if ray direction is negative the next edge collision will be the same as the current coord
+    //  if ray direction is positive it will be one more than the coord
+    const float3 select = 0.5 + 0.5 * sign(r.inv); //use inverse instead of dir bc of floating point
+    const float3 planes = coord + select;
+
+    //Finding t needed to travel to planes along ray direction
+    float3 t = (planes - r.origin) * r.inv;
+    
+    //Maximum number of steps before exit
+    const int maxTrav = 1000000;
+    for(int i = 0; i < maxTrav; i++)
+    {
+        const BlockRenderData block = _BlockDataBuffer[GetIndex(coord)];
+        const BlockStateRenderData state = _BlockStateDataBuffer[block.stateI];
+        if (state.solid == 1)
+        {
+            hit.collide = 1; //true
+            hit.coord = coord;
+            hit.pos = float3(coord.x / worldWidth, coord.y / worldHeight, coord.z / 1);
+            
+            return hit;
+        }
+
+        //Go the shortest t
+        if (t.x < t.y)
+        {
+            if (t.x < t.z)
+            {
+                coord.x += step.x;
+                t.x += delta.x;
+            }else
+            {
+                coord.z += step.z;
+                t.z += delta.z;
+            }
+        }else
+        {
+            if (t.y < t.z)
+            {
+                coord.y += step.y;
+                t.y += delta.y;
+            }else
+            {
+                coord.z += step.z;
+                t.z += delta.z;
+            }
+        }
+
+        //exited available area
+        if (coord.x < 0 || coord.x > worldWidth || coord.y < 0 || coord.y > worldHeight || coord.z < 0 || coord.z > 1)
+        {
+            hit.collide = 0; //false
+            hit.pos = float3(coord.x > worldWidth ? 1 : 0, coord.y > worldHeight ? 1 : 0, coord.z > 1 ? 1 : 0);
+            return hit;
+        }
+    }
+
+    //Did not exit or collide within maxTrav so throw error
+    hit.error = 1; //true
+    return hit;
+}
+
+//****** Color Manipulation ******
 
 //Written by Claud Sonnet 4.6
 float4 AlphaBlend(float4 bottom, float4 top)
@@ -44,35 +158,60 @@ float4 AlphaBlend(float4 bottom, float4 top)
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
+    //Calculate UV
     float2 uv = float2((float) id.x / textureWidth, (float) id.y / textureHeight);
+    
     // Result[id.xy] = float4(uv.x, uv.y, 0, 1);
     // Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 1);
 
+    //Convert to world coord
     const float2 block_uv = float2(uv.x * worldWidth, uv.y * worldHeight);
 
+    //Find spot in texture
     const float2 tex_uv = fmod(block_uv, 1);
 
+    //Get array x and y
     const int2 array_uv = int2((int) block_uv.x, (int) block_uv.y);
 
+    //Getting block array indices
     const int g_block_index = GetIndex(array_uv.x, array_uv.y, true);
     const int ag_block_index = GetIndex(array_uv.x, array_uv.y, false);
 
+    //Getting block information
     const BlockRenderData g_block = _BlockDataBuffer[g_block_index];
     const BlockRenderData ag_block = _BlockDataBuffer[ag_block_index];
 
+    //Getting block state information
     const BlockStateRenderData g_state = _BlockStateDataBuffer[g_block.stateI];
     const BlockStateRenderData ag_state = _BlockStateDataBuffer[ag_block.stateI];
-
+    
     // type.animated is 0 if there is no animation so it will destroy any value generated by the rest of it
+    //Getting the index of the texture in _BlockTex
     const float g_texIndex = g_state.texIndex + g_state.animated * fmod(floor(Time * g_state.fps), (float) g_state.numFrames);
     const float ag_texIndex = ag_state.texIndex + ag_state.animated * fmod(floor(Time * ag_state.fps), (float) ag_state.numFrames);
 
+    //Adjusting tex_uv to account for rotation
     const float2 g_adjusted_tex_uv = (g_block.rotated ^ 1) * tex_uv + g_block.rotated * float2(tex_uv.y, tex_uv.x);
     const float2 ag_adjusted_tex_uv = (ag_block.rotated ^ 1) * tex_uv + ag_block.rotated * float2(tex_uv.y, tex_uv.x);
-    
+
+    //Getting color of pixel at the blocks
     const float4 g_col = _BlockTexs.SampleLevel(sampler_BlockTexs, float3(g_adjusted_tex_uv.x, g_adjusted_tex_uv.y, g_texIndex), 0.0);
     const float4 ag_col = _BlockTexs.SampleLevel(sampler_BlockTexs, float3(ag_adjusted_tex_uv.x, ag_adjusted_tex_uv.y, ag_texIndex), 0.0);
 
+    //Combining colors for final color
     const float4 final_col = AlphaBlend(g_col, ag_col);
-    Result[id.xy] = final_col;
+
+    const float3 origin = float3(block_uv.x, block_uv.y, ag_state.solid + 1); //solid ? 2 : 1
+    Ray sunRay;
+    sunRay.origin = origin;
+    sunRay.dir = Sun - origin;
+    sunRay.inv = 1 / sunRay.dir;
+
+    HitInfo hit = Traverse(sunRay);
+
+    const float4 errorColor = float4(1, 0, 1, 1);
+    const float4 shadowAdjustedColor = final_col * (1 - 0.5 * hit.collide);
+    
+    Result[id.xy] = hit.error * errorColor + (1 ^ hit.error) * shadowAdjustedColor;
+    // Result[id.xy] = float4(hit.pos, 1);
 }

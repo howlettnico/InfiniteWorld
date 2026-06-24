@@ -14,6 +14,7 @@ public class RaytracingManager : MonoBehaviour
         public int animated; // 0 false, 1 is true
         public int numFrames;
         public float fps;
+        public int solid; // 0 false, 1 is true
     }
 
     private struct BlockRenderData
@@ -30,6 +31,7 @@ public class RaytracingManager : MonoBehaviour
     [SerializeField] private int textureWidth = 16, textureHeight = 16;
     [SerializeField] private int worldWidth = 10, worldHeight = 10;
     [SerializeField] private bool perPixel;
+    [SerializeField] private Vector3 sunPos;
     
     private GraphicsBuffer _blockDataBuffer;
     private GraphicsBuffer _blockStateDataBuffer;
@@ -71,7 +73,8 @@ public class RaytracingManager : MonoBehaviour
                     texIndex = s.trueTextureIndex,
                     animated = s.animated ? 1 : 0,
                     numFrames = s.animationFrameCount,
-                    fps = s.animationFPS
+                    fps = s.animationFPS,
+                    solid = t.solid ? 1 : 0
                 };
 
                 // Debug.Log(t.blockName + " " + sI + " " + index + ":" + i);
@@ -90,8 +93,26 @@ public class RaytracingManager : MonoBehaviour
         _blockStateDataBuffer.SetData(_states);
         
         //Sending to GPU
-        raytracingShader.SetBuffer(kernel, "_BlockStateDataBuffer", _blockStateDataBuffer);
-        raytracingShader.SetTexture(kernel, "_BlockTexs", blockTexs);
+        SendOneTimeVars();
+    }
+    
+    private void OnDestroy()
+    {
+        _blockDataBuffer?.Release();
+        _blockStateDataBuffer?.Release();
+        if (texture != null) texture.Release();
+    }
+
+    private void OnValidate()
+    {
+        SendOneTimeVars();
+    }
+
+    private void SendOneTimeVars()
+    {
+        kernel = raytracingShader.FindKernel("CSMain");
+        if (_blockStateDataBuffer != null) raytracingShader.SetBuffer(kernel, "_BlockStateDataBuffer", _blockStateDataBuffer);
+        if (blockTexs != null) raytracingShader.SetTexture(kernel, "_BlockTexs", blockTexs);
     }
 
     private void CreateTexture()
@@ -174,6 +195,7 @@ public class RaytracingManager : MonoBehaviour
         }
         
         //Getting Block Information
+        Coord topLeft = new Coord(pCoord.x - worldWidth / 2, pCoord.y - worldHeight / 2);
         GetBlockInformation(pCoord, true);
         GetBlockInformation(pCoord, false);
         _blockDataBuffer.SetData(_blockData);
@@ -187,6 +209,7 @@ public class RaytracingManager : MonoBehaviour
         raytracingShader.SetInt("worldWidth", worldWidth);
         raytracingShader.SetInt("worldHeight", worldHeight);
         raytracingShader.SetFloat("Time", Time.time);
+        raytracingShader.SetVector("Sun", new Vector4(pPos.x - topLeft.x, pPos.y - topLeft.y, 10, 0));
         raytracingShader.SetBuffer(kernel, "_BlockDataBuffer", _blockDataBuffer);
         raytracingShader.Dispatch(kernel, texture.width / 8, texture.height / 8, 1);
     }
