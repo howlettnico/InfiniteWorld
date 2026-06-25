@@ -82,6 +82,7 @@ namespace World.Blocks
                         public int baseHeightTextureIndex;
                         [HideInInspector] public int trueHeightTextureIndex;
                         public bool heightAnimated;
+                        public int heightExtends = 0;//zero means all the way down
                 }
         }
 }

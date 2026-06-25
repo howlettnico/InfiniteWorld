@@ -24,8 +24,9 @@ MonoBehaviour:
     animationFPS: 1
     height: 100
     baseHeightTextureIndex: 0
-    trueHeightTextureIndex: 0
+    trueHeightTextureIndex: 1
     heightAnimated: 0
+    heightExtends: 0
   rotatable: 0
   solid: 1
   replaceable: 0

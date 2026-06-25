@@ -26,6 +26,7 @@ MonoBehaviour:
     baseHeightTextureIndex: 0
     trueHeightTextureIndex: 0
     heightAnimated: 0
+    heightExtends: 1
   rotatable: 0
   solid: 0
   replaceable: 1
