@@ -64,15 +64,21 @@ int GetIndex(float3 c)
     return c.y * worldWidth + c.x + (c.z == 0 ? 0 : worldWidth * worldHeight);
 }
 
-//****** Raytracing ******
-//SOURCE: Shadertoy: https://iquilezles.org/articles/intersectors/
-HitInfo AABB_Collission(Ray r, float3 boxSize, float3 coord)
+HitInfo NewHitInfo()
 {
     HitInfo hit;
     hit.error = 0;
     hit.collide = 0;
     hit.coord = float3(0, 0, 0);
     hit.pos = float3(0, 0, 0);
+    return hit;
+}
+
+//****** Raytracing ******
+//SOURCE: Shadertoy: https://iquilezles.org/articles/intersectors/
+HitInfo AABB_Collission(Ray r, float3 boxSize, float3 coord)
+{
+    HitInfo hit = NewHitInfo();
 
     const float3 halfExtents = boxSize / 2;
     const float3 centre = coord + halfExtents;
@@ -85,6 +91,7 @@ HitInfo AABB_Collission(Ray r, float3 boxSize, float3 coord)
     const float tN = max( max( t1.x, t1.y ), t1.z );
     const float tF = min( min( t2.x, t2.y ), t2.z );
     if( tN>tF || tF<0.0) // no intersection
+    // if( tN>tF || tF<0.0 || tN < 0.001) // no intersection
     {
         hit.collide = 0;
         return hit;
@@ -104,21 +111,31 @@ HitInfo AABB_Collission(Ray r, float3 boxSize, float3 coord)
 
 HitInfo TraverseBlock(Ray r, BlockStateRenderData s, float3 coord)
 {
-    HitInfo hit;
-    hit.error = 0;
-    hit.collide = 0;
+    HitInfo hit = NewHitInfo();
     hit.coord = coord;
-    hit.pos = float3(0, 0, 0);
 
     float inv8 = 0.125; //1/8
 
     // height = none so never hits (could technically do with height == 8 but wouldnt have pos so just use aabb
     if (s.height == 0) return hit;
 
-    //simple rectangular collision
-    if (s.height != 100) return AABB_Collission(r, float3(1, 1, (float) (s.heightExtends == 0 ? s.height : s.heightExtends) * inv8), s.heightExtends == 0 ? coord : float3(coord.xy, coord.z + (s.height - s.heightExtends) * inv8));
+    //---simple rectangular collision---
+    
+    //adjusting height depending on how much it extends downwards
+    float blockHeight;
+    float adjustedCoordZ; //bottom corner of the block
+    if (s.heightExtends == 0)// extends all the way down
+    {
+        blockHeight = s.height * inv8;
+        adjustedCoordZ = coord.z;
+    }else
+    {
+        blockHeight = s.heightExtends * inv8;
+        adjustedCoordZ = coord.z + (s.height - s.heightExtends) * inv8;
+    }
+    if (s.height != 100) return AABB_Collission(r, float3(1, 1, blockHeight), float3(coord.xy, adjustedCoordZ));
 
-    //Custom height collision STARTS HERE
+    //---Custom height collision---
     
     //Finding height texture index
     const int texIndex = s.heightTexIndex + s.heightAnimated * fmod(floor(Time * s.fps), (float) s.numFrames);
@@ -151,16 +168,32 @@ HitInfo TraverseBlock(Ray r, BlockStateRenderData s, float3 coord)
 
         const float4 texSample = _BlockHeightTexs.SampleLevel(sampler_BlockHeightTexs, float3(uv.xy, texIndex), 0.0);
 
-        const float blockHeight = texSample.r;
+        const float sampledHeight = texSample.r;
         
-        //collided with object with height`
-        if (uv.z < blockHeight && (s.heightExtends == 0 || uv.z >= blockHeight - s.heightExtends * inv8))
+        //collided with object with height
+        // if (uv.z < sampledHeight && (s.heightExtends == 0 || uv.z >= sampledHeight - s.heightExtends * inv8))
+        if (sampledHeight > 0 && uv.z < sampledHeight)
         {
             const float3 cuv = coord + uv;
-            HitInfo subCoordHit = AABB_Collission(r, float3(inv8, inv8, s.heightExtends == 0 ? blockHeight : s.heightExtends * inv8), s.heightExtends == 0 ? cuv : float3(cuv.xy, cuv.z + (blockHeight - s.heightExtends) * inv8));
+            
+            //Adjusts heights depending on how much the height extends
+            float boxHeight;
+            float adjustedZ;
+            if (s.heightExtends == 0)
+            {
+                boxHeight = sampledHeight;
+                adjustedZ = coord.z;
+            }else
+            {
+                boxHeight = s.heightExtends * inv8;
+                adjustedZ = coord.z + sampledHeight - s.heightExtends * inv8;
+            }
+            //this is just to calculate the positions, the collission should happen no matter what which
+            // is why an error is thrown if it does not return with a collision
+            HitInfo subCoordHit = AABB_Collission(r, float3(inv8, inv8, boxHeight), float3(cuv.xy, adjustedZ));
             
             // subCoordHit.collide = 1;
-            subCoordHit.error = subCoordHit.collide == 0 ? 1 : 0;
+            // subCoordHit.error = subCoordHit.collide == 0 ? 1 : 0;
             subCoordHit.coord = coord;
             if (subCoordHit.collide == 1) return subCoordHit;//return if hit inside of block!
         }
@@ -191,7 +224,7 @@ HitInfo TraverseBlock(Ray r, BlockStateRenderData s, float3 coord)
         }
 
         //exited available area
-        if (subCoord.x < 0 || subCoord.x > 8 || subCoord.y < 0 || subCoord.y > 8 || subCoord.z < 0 || subCoord.z > 8)
+        if (subCoord.x < 0 || subCoord.x >= 8 || subCoord.y < 0 || subCoord.y >= 8 || subCoord.z < 0 || subCoord.z >= 8)
         {
             hit.collide = 0; //false
             return hit;
@@ -213,11 +246,7 @@ HitInfo TraverseBlock(Ray r, BlockStateRenderData s, float3 coord)
 
 HitInfo Traverse(Ray r)
 {
-    HitInfo hit;
-    hit.error = 0;
-    hit.collide = 0;
-    hit.coord = float3(0, 0, 0);
-    hit.pos = float3(0, 0, 0);
+    HitInfo hit = NewHitInfo();
 
     const HitInfo outerBoundsHit = AABB_Collission(r, float3(worldWidth, worldHeight, 1), float3(0, 0, 0));
     if (outerBoundsHit.collide == 0) return outerBoundsHit;
@@ -353,12 +382,12 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
     if (ag_state.height != 0)
     {
-        const int ag_height_index = ag_state.heightTexIndex + ag_state.heightAnimated * fmod(floor(Time * ag_state.fps), (float) ag_state.numFrames);
         if (ag_state.height != 100)
         {
             height += ag_state.height * 0.125;
         }else
         {
+            const int ag_height_index = ag_state.heightTexIndex + ag_state.heightAnimated * fmod(floor(Time * ag_state.fps), (float) ag_state.numFrames);
             const float4 ag_height = _BlockHeightTexs.SampleLevel(sampler_BlockHeightTexs, float3(ag_adjusted_tex_uv.x, ag_adjusted_tex_uv.y, ag_height_index), 0.0);
             height += ag_height.r;
         }
@@ -367,6 +396,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     const float3 origin = float3(block_uv.x, block_uv.y, height); //solid ? 2 : 1
     Ray sunRay;
     sunRay.origin = origin;
+    // sunRay.dir = Sun - origin;
     sunRay.dir = Sun;
     sunRay.inv = 1 / sunRay.dir;
 

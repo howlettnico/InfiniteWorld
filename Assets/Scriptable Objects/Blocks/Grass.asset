@@ -15,13 +15,21 @@ MonoBehaviour:
   ID: 10
   blockName: Grass
   texture: {fileID: 2800000, guid: 3d30693c1aad14a189b9b93e162e665f, type: 3}
-  textureIndex: 1
-  animated: 0
-  animationFrameCount: 1
-  animationFPS: 1
+  customHeightTexture: {fileID: 0}
+  states:
+  - baseTextureIndex: 0
+    trueTextureIndex: 1
+    animated: 0
+    animationFrameCount: 1
+    animationFPS: 1
+    height: 0
+    baseHeightTextureIndex: 0
+    trueHeightTextureIndex: 0
+    heightAnimated: 0
+    heightExtends: 0
   rotatable: 0
-  drops: []
   solid: 0
   replaceable: 0
   blockScript: 10
   customData: 0
+  drops: []

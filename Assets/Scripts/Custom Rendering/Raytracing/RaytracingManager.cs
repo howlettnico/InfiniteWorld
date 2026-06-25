@@ -117,6 +117,7 @@ public class RaytracingManager : MonoBehaviour
 
     private void SendOneTimeVars()
     {
+        if (_blockManager == null) return;
         kernel = raytracingShader.FindKernel("CSMain");
         if (_blockStateDataBuffer != null) raytracingShader.SetBuffer(kernel, "_BlockStateDataBuffer", _blockStateDataBuffer);
         if (_blockManager.typeCollection.blockTextures != null) raytracingShader.SetTexture(kernel, "_BlockTexs", _blockManager.typeCollection.blockTextures);
@@ -216,8 +217,8 @@ public class RaytracingManager : MonoBehaviour
         raytracingShader.SetInt("worldHeight", worldHeight);
         raytracingShader.SetFloat("Time", Time.time);
         // raytracingShader.SetVector("Sun", new Vector4(pPos.x - topLeft.x + sunPos.x, pPos.y - topLeft.y + sunPos.y, sunPos.z, 0));
-        // raytracingShader.SetVector("Sun", sunPos);
-        raytracingShader.SetVector("Sun", new Vector4(Mathf.Sin(Time.time / 10) * 10, 5, Mathf.Sin(Time.time / 10) * 20));
+        raytracingShader.SetVector("Sun", sunPos);
+        // raytracingShader.SetVector("Sun", new Vector4(Mathf.Sin(Time.time / 10) * 10, 5, Mathf.Sin(Time.time / 10) * 20));
         raytracingShader.SetBuffer(kernel, "_BlockDataBuffer", _blockDataBuffer);
         raytracingShader.Dispatch(kernel, texture.width / 8, texture.height / 8, 1);
     }
