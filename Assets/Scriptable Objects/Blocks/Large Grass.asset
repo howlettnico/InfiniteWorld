@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::World.Blocks.BlockType
   ID: 40
   blockName: Large Grass
-  texture: {fileID: 2800000, guid: d24fd882b1c9d4b839a0dc4b2f4bc4a2, type: 3}
-  customHeightTexture: {fileID: 2800000, guid: 5aae1ef4ad76e427db81a6dd1df42bbf, type: 3}
+  texture: {fileID: 2800000, guid: 97c25659cb9714ebe9050ae5f147eebb, type: 3}
+  customHeightTexture: {fileID: 2800000, guid: b9ab6c35172024544acea796b1e0a170, type: 3}
   states:
   - baseTextureIndex: 0
     trueTextureIndex: 4
@@ -26,7 +26,7 @@ MonoBehaviour:
     baseHeightTextureIndex: 0
     trueHeightTextureIndex: 0
     heightAnimated: 0
-    heightExtends: 1
+    heightExtends: 2
   rotatable: 0
   solid: 0
   replaceable: 1

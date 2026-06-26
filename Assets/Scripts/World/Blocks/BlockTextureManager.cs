@@ -134,7 +134,7 @@ namespace World.Blocks
             //TODO repeat for light brightness
 
             //Creating Texture
-            Texture2DArray texArray = new Texture2DArray(textureSize, textureSize, totalTextures, TextureFormat.RGBA32, false);
+            Texture2DArray texArray = new Texture2DArray(textureSize, textureSize, totalTextures, TextureFormat.RGBA32, false, true);
             texArray.wrapMode = TextureWrapMode.Clamp;
             texArray.filterMode = FilterMode.Point;
 

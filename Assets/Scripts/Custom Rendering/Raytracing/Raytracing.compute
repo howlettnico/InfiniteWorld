@@ -33,8 +33,10 @@ struct HitInfo
 {
     int error;
     int collide;
+    float distance;
     float3 coord;
     float3 pos;
+    float3 normal;
     //**********TODO****** add normal
 };
 
@@ -71,12 +73,14 @@ HitInfo NewHitInfo()
     hit.collide = 0;
     hit.coord = float3(0, 0, 0);
     hit.pos = float3(0, 0, 0);
+    hit.distance = 0;
+    hit.normal = float3(0, 0, 0);
     return hit;
 }
 
 //****** Raytracing ******
 //SOURCE: Shadertoy: https://iquilezles.org/articles/intersectors/
-HitInfo AABB_Collission(Ray r, float3 boxSize, float3 coord)
+HitInfo AABB_Collision(Ray r, float3 boxSize, float3 coord)
 {
     HitInfo hit = NewHitInfo();
 
@@ -91,36 +95,33 @@ HitInfo AABB_Collission(Ray r, float3 boxSize, float3 coord)
     const float tN = max( max( t1.x, t1.y ), t1.z );
     const float tF = min( min( t2.x, t2.y ), t2.z );
     if( tN>tF || tF<0.0) // no intersection
-    // if( tN>tF || tF<0.0 || tN < 0.001) // no intersection
     {
         hit.collide = 0;
         return hit;
     }
-    //*******TODO******** Add normal
-    // float2 oNormal = (tN>0.0) ? step(float2(tN, tN),t1) : // ro ouside the box
-    //                        step(t2,float3(tF, tF, tF));  // ro inside the box
-    // oNormal *= -sign(r.dir);
+    
+    //normal calculation combined from shadertoy and Gemini
+    // If r.origin is OUTSIDE the box (tN > 0), we check which component of t1 matches tN.
+    // If r.origin is INSIDE the box (tN <= 0), the ray hits an exit wall, so we look at t2 matching tF.
+    const float3 rawNormal = (tN > 0.0) ? step(t1, float3(tN, tN, tN)) 
+                                  : step(float3(tF, tF, tF), t2);
+    
+    // Combine with the sign of the ray inverse to point the normal OUTWARD
+    // Using r.inv (or r.dir) gives the correct facing sign
+    hit.normal = rawNormal * -sign(r.inv);
 
     hit.collide = 1;
     hit.coord = coord;
     hit.pos = r.origin + r.dir * tN;
+    hit.distance = tN * length(r.dir);
 
     return hit;
     // return float2( tN, tF );
 }
 
-HitInfo TraverseBlock(Ray r, BlockStateRenderData s, float3 coord)
+HitInfo VariableBlockHeightCollision(Ray r, BlockStateRenderData s, float3 coord)
 {
-    HitInfo hit = NewHitInfo();
-    hit.coord = coord;
-
     float inv8 = 0.125; //1/8
-
-    // height = none so never hits (could technically do with height == 8 but wouldnt have pos so just use aabb
-    if (s.height == 0) return hit;
-
-    //---simple rectangular collision---
-    
     //adjusting height depending on how much it extends downwards
     float blockHeight;
     float adjustedCoordZ; //bottom corner of the block
@@ -133,21 +134,28 @@ HitInfo TraverseBlock(Ray r, BlockStateRenderData s, float3 coord)
         blockHeight = s.heightExtends * inv8;
         adjustedCoordZ = coord.z + (s.height - s.heightExtends) * inv8;
     }
-    if (s.height != 100) return AABB_Collission(r, float3(1, 1, blockHeight), float3(coord.xy, adjustedCoordZ));
 
-    //---Custom height collision---
+    return AABB_Collision(r, float3(1, 1, blockHeight), float3(coord.xy, adjustedCoordZ));
+}
+
+HitInfo TraverseBlock(Ray r, BlockStateRenderData s, int3 coord, float3 entrancePoint)
+{
+    float inv8 = 0.125; //1/8
+
+    HitInfo hit = NewHitInfo();
     
     //Finding height texture index
     const int texIndex = s.heightTexIndex + s.heightAnimated * fmod(floor(Time * s.fps), (float) s.numFrames);
-    
-    const HitInfo wholeBlockHit = AABB_Collission(r, float3(1, 1, 1), coord);
+
+    const HitInfo wholeBlockHit = AABB_Collision(r, float3(1, 1, 1), coord);
     if (wholeBlockHit.collide == 0) return wholeBlockHit;
     
-    const float3 localPos = clamp(wholeBlockHit.pos - coord, 0.001, 0.999);
-    float3 subCoord = floor(localPos * 8);
+    const float3 localPos = clamp(wholeBlockHit.pos - coord, 0, 0.999);
+    // const float3 localPos = clamp(entrancePoint - coord, 0, 0.9999);
+    int3 subCoord = floor(localPos * 8);
     
     //Step direction based on sign of ray direction
-    const float3 step = sign(r.inv); //use inverse instead of dir bc of floating point
+    const int3 step = sign(r.inv); //use inverse instead of dir bc of floating point
     const float3 delta = abs(r.inv) * inv8;
 
     //Finding xyz planes to collide with
@@ -159,54 +167,70 @@ HitInfo TraverseBlock(Ray r, BlockStateRenderData s, float3 coord)
 
     //Finding t needed to travel to planes along ray direction
     float3 t = (worldPlanes - r.origin) * r.inv;
+    const float3 toEntrance = entrancePoint - r.origin;
+    float finalT = dot(toEntrance, r.dir) / dot(r.dir, r.dir);//line from Gemini
+    float3 hitNormal = float3(0, 0, 0);
     
     //Maximum number of steps before exit
     const int maxTrav = 1000000;
     for(int i = 0; i < maxTrav; i++)
     {
         const float3 uv = subCoord * inv8;
-
-        const float4 texSample = _BlockHeightTexs.SampleLevel(sampler_BlockHeightTexs, float3(uv.xy, texIndex), 0.0);
-
+        
+        const float3 sampleUV = float3(uv.xy + (inv8 * 0.5), texIndex);
+        const float4 texSample = _BlockHeightTexs.SampleLevel(sampler_BlockHeightTexs, sampleUV, 0.0);
         const float sampledHeight = texSample.r;
+
+        const float nextT = min(min(t.x, t.y), t.z);
+        
+        const float zIn  = (r.origin.z + r.dir.z * finalT) - coord.z;
+        const float zOut = (r.origin.z + r.dir.z * nextT)  - coord.z;
+
+        const float rayMinZ = min(zIn, zOut);
+        const float rayMaxZ = max(zIn, zOut);
+
+        const bool structuralHit = rayMinZ < sampledHeight && 
+                             (s.heightExtends == 0 || rayMaxZ >= sampledHeight - s.heightExtends * inv8);
         
         //collided with object with height
-        // if (uv.z < sampledHeight && (s.heightExtends == 0 || uv.z >= sampledHeight - s.heightExtends * inv8))
-        if (sampledHeight > 0 && uv.z < sampledHeight)
+        if (structuralHit)
         {
-            const float3 cuv = coord + uv;
-            
-            //Adjusts heights depending on how much the height extends
-            float boxHeight;
-            float adjustedZ;
-            if (s.heightExtends == 0)
+            if (zIn > sampledHeight && r.dir.z != 0.0)
             {
-                boxHeight = sampledHeight;
-                adjustedZ = coord.z;
-            }else
-            {
-                boxHeight = s.heightExtends * inv8;
-                adjustedZ = coord.z + sampledHeight - s.heightExtends * inv8;
+                // Solve r.origin.z + r.dir.z * finalT - coord.z = sampledHeight for finalT
+                const float intersectT = (coord.z + sampledHeight - r.origin.z) / r.dir.z;
+                // Clamp it to ensure precision issues don't push it out of our DDA interval
+                finalT = max(finalT, intersectT);
+                hitNormal = float3(0, 0, sign(r.dir.z)); // Clean horizontal top/bottom face hit normal
             }
-            //this is just to calculate the positions, the collission should happen no matter what which
-            // is why an error is thrown if it does not return with a collision
-            HitInfo subCoordHit = AABB_Collission(r, float3(inv8, inv8, boxHeight), float3(cuv.xy, adjustedZ));
-            
-            // subCoordHit.collide = 1;
-            // subCoordHit.error = subCoordHit.collide == 0 ? 1 : 0;
-            subCoordHit.coord = coord;
-            if (subCoordHit.collide == 1) return subCoordHit;//return if hit inside of block!
+            // hit.error = 1;
+            hit.collide = 1;
+            hit.coord = coord;
+            hit.pos = r.origin + r.dir * finalT, 1;
+            hit.distance = finalT * length(r.dir);
+            hit.normal = (i == 0) ? wholeBlockHit.normal : hitNormal;
+            return hit;
         }
+
+        // const float height = s.heightExtends == 0 ? sampledHeight : s.heightExtends * inv8;
+        // const float coordZ = coord.z + sampledHeight - height;
+        // HitInfo hiiit = AABB_Collision(r, float3(inv8, inv8, height), float3(uv.xy, coordZ));
+        // hiiit.coord = coord;
+        // if (hiiit.collide == 1) return hiiit;
 
         //Go the shortest t
         if (t.x < t.y)
         {
             if (t.x < t.z)
             {
+                finalT = t.x;
+                hitNormal = float3(-step.x, 0, 0);
                 subCoord.x += step.x;
                 t.x += delta.x;
             }else
             {
+                finalT = t.z;
+                hitNormal = float3(0, 0, -step.z);
                 subCoord.z += step.z;
                 t.z += delta.z;
             }
@@ -214,10 +238,14 @@ HitInfo TraverseBlock(Ray r, BlockStateRenderData s, float3 coord)
         {
             if (t.y < t.z)
             {
+                finalT = t.y;
+                hitNormal = float3(0, -step.y, 0);
                 subCoord.y += step.y;
                 t.y += delta.y;
-            }else
+            }else 
             {
+                finalT = t.z;
+                hitNormal = float3(0, 0, -step.z);
                 subCoord.z += step.z;
                 t.z += delta.z;
             }
@@ -234,13 +262,25 @@ HitInfo TraverseBlock(Ray r, BlockStateRenderData s, float3 coord)
     //Did not exit or collide within maxTrav so throw error
     hit.error = 1; //true
     return hit;
+}
+
+HitInfo BlockCollision(Ray r, BlockStateRenderData s, int3 coord, float3 entrancePoint)
+{
+    // height = none so never hits (could technically do with height == 8 but wouldnt have pos so just use aabb
+    if (s.height == 0) return NewHitInfo();
+
+    //---simple rectangular collision---
     
+    if (s.height != 100) return VariableBlockHeightCollision(r, s, coord);
+
+    //---Custom height collision---
     
+    return TraverseBlock(r, s, coord, entrancePoint);
     
-    hit.error = 1;
-    hit.collide = 1;
+    // hit.error = 1;
+    // hit.collide = 1;
     // hit.pos = float3(subCoord) / 8; //looks very cool
-    return hit;
+    // return hit;
 
 }
 
@@ -248,14 +288,15 @@ HitInfo Traverse(Ray r)
 {
     HitInfo hit = NewHitInfo();
 
-    const HitInfo outerBoundsHit = AABB_Collission(r, float3(worldWidth, worldHeight, 1), float3(0, 0, 0));
-    if (outerBoundsHit.collide == 0) return outerBoundsHit;
+    HitInfo outerBoundsHit = AABB_Collision(r, float3(worldWidth, worldHeight, 1), float3(0, 0, 0));
+    // if (outerBoundsHit.collide == 0) return outerBoundsHit;
 
-    //******TODO******* replace with AABB collision
-    float3 coord = floor(r.origin);
+    float finalT = outerBoundsHit.distance / length(r.dir);
+    const float3 rayStart = r.origin + r.dir * finalT;
+    int3 coord = clamp(floor(rayStart), int3(0, 0, 0), int3(worldWidth - 1, worldHeight - 1, 0));
 
     //Step direction based on sign of ray direction
-    const float3 step = sign(r.inv); //use inverse instead of dir bc of floating point
+    const int3 step = sign(r.inv); //use inverse instead of dir bc of floating point
     const float3 delta = abs(r.inv);
 
     //Finding xyz planes to collide with
@@ -278,7 +319,9 @@ HitInfo Traverse(Ray r)
         //collided with object with height
         if (state.height != 0)
         {
-            HitInfo blockHit = TraverseBlock(r, state, coord);
+            const float3 entrancePoint = r.origin + r.dir * finalT;
+            
+            const HitInfo blockHit = BlockCollision(r, state, coord, entrancePoint);
             
             if (blockHit.collide == 1) return blockHit;//return if hit inside of block!
         }
@@ -288,10 +331,12 @@ HitInfo Traverse(Ray r)
         {
             if (t.x < t.z)
             {
+                finalT = t.x;
                 coord.x += step.x;
                 t.x += delta.x;
             }else
             {
+                finalT = t.z;
                 coord.z += step.z;
                 t.z += delta.z;
             }
@@ -299,17 +344,19 @@ HitInfo Traverse(Ray r)
         {
             if (t.y < t.z)
             {
+                finalT = t.y;
                 coord.y += step.y;
                 t.y += delta.y;
             }else
             {
+                finalT = t.z;
                 coord.z += step.z;
                 t.z += delta.z;
             }
         }
 
         //exited available area
-        if (coord.x < 0 || coord.x > worldWidth || coord.y < 0 || coord.y > worldHeight || coord.z < 0 || coord.z > 1)
+        if (coord.x < 0 || coord.x >= worldWidth || coord.y < 0 || coord.y >= worldHeight || coord.z < 0 || coord.z > 1)
         {
             hit.collide = 0; //false
             return hit;
@@ -384,7 +431,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     {
         if (ag_state.height != 100)
         {
-            height += ag_state.height * 0.125;
+            height += (float) ag_state.height * 0.125;
         }else
         {
             const int ag_height_index = ag_state.heightTexIndex + ag_state.heightAnimated * fmod(floor(Time * ag_state.fps), (float) ag_state.numFrames);
@@ -393,19 +440,20 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         }
     }
 
-    const float3 origin = float3(block_uv.x, block_uv.y, height); //solid ? 2 : 1
+    const float3 origin = float3(block_uv.x, block_uv.y, height + 0.01); 
     Ray sunRay;
     sunRay.origin = origin;
     // sunRay.dir = Sun - origin;
-    sunRay.dir = Sun;
+    sunRay.dir = normalize(Sun);
     sunRay.inv = 1 / sunRay.dir;
 
     HitInfo hit = Traverse(sunRay);
 
-    const float4 errorColor = float4(1, 0, 1, 1);
+    const float4 errorColor = float4(hit.pos, 1);
     const float4 shadowAdjustedColor = final_col * (1 - 0.5 * hit.collide);
     
     Result[id.xy] = hit.error * errorColor + (1 ^ hit.error) * shadowAdjustedColor;
-    // Result[id.xy] = float4(hit.pos, 1);
+    // Result[id.xy] = float4(fmod(hit.pos, 1), 1);
     // Result[id.xy] = float4(height - 1, 0, 0, 1);
+    // Result[id.xy] = float4(hit.distance / 1, 0, 0, 1);
 }

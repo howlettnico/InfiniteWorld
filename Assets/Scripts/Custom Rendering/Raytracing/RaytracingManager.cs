@@ -220,6 +220,7 @@ public class RaytracingManager : MonoBehaviour
         raytracingShader.SetVector("Sun", sunPos);
         // raytracingShader.SetVector("Sun", new Vector4(Mathf.Sin(Time.time / 10) * 10, 5, Mathf.Sin(Time.time / 10) * 20));
         raytracingShader.SetBuffer(kernel, "_BlockDataBuffer", _blockDataBuffer);
+        SendOneTimeVars();
         raytracingShader.Dispatch(kernel, texture.width / 8, texture.height / 8, 1);
     }
 
