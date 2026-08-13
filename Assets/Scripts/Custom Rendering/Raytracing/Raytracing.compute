@@ -45,6 +45,7 @@ float3 Sun;
 
 RWTexture2D<float4> Result;
 int textureWidth, textureHeight, worldWidth, worldHeight;
+float4 indirectLight, directLight;
 
 StructuredBuffer<BlockRenderData> _BlockDataBuffer;
 StructuredBuffer<BlockStateRenderData> _BlockStateDataBuffer;
@@ -150,8 +151,11 @@ HitInfo TraverseBlock(Ray r, BlockStateRenderData s, int3 coord, float3 entrance
     const HitInfo wholeBlockHit = AABB_Collision(r, float3(1, 1, 1), coord);
     if (wholeBlockHit.collide == 0) return wholeBlockHit;
     
-    const float3 localPos = clamp(wholeBlockHit.pos - coord, 0, 0.999);
+    // const float3 localPos = clamp(wholeBlockHit.pos - coord, 0, 0.999);
+    const float3 localPos = clamp(entrancePoint - coord, 0, 0.999);
     // const float3 localPos = clamp(entrancePoint - coord, 0, 0.9999);
+    // int3 subCoord = floor(localPos * 8);
+
     int3 subCoord = floor(localPos * 8);
     
     //Step direction based on sign of ray direction
@@ -189,7 +193,7 @@ HitInfo TraverseBlock(Ray r, BlockStateRenderData s, int3 coord, float3 entrance
         const float rayMinZ = min(zIn, zOut);
         const float rayMaxZ = max(zIn, zOut);
 
-        const bool structuralHit = rayMinZ < sampledHeight && 
+        bool structuralHit = rayMinZ < sampledHeight && 
                              (s.heightExtends == 0 || rayMaxZ >= sampledHeight - s.heightExtends * inv8);
         
         //collided with object with height
@@ -199,14 +203,27 @@ HitInfo TraverseBlock(Ray r, BlockStateRenderData s, int3 coord, float3 entrance
             {
                 // Solve r.origin.z + r.dir.z * finalT - coord.z = sampledHeight for finalT
                 const float intersectT = (coord.z + sampledHeight - r.origin.z) / r.dir.z;
-                // Clamp it to ensure precision issues don't push it out of our DDA interval
-                finalT = max(finalT, intersectT);
-                hitNormal = float3(0, 0, sign(r.dir.z)); // Clean horizontal top/bottom face hit normal
+
+                if (i == 0 && intersectT < 0.015) 
+                {
+                    structuralHit = false; 
+                }
+                else
+                {
+                    // Clamp it to ensure precision issues don't push it out of our DDA interval
+                    finalT = max(finalT, intersectT);
+                    hitNormal = float3(0, 0, sign(r.dir.z)); // Clean horizontal top/bottom face hit normal
+                }
             }
+        }
+        
+        if (structuralHit)
+        {
             // hit.error = 1;
             hit.collide = 1;
             hit.coord = coord;
-            hit.pos = r.origin + r.dir * finalT, 1;
+            // hit.pos = r.origin + r.dir * finalT;
+            hit.pos = float3(frac(hit.pos.z), 0, 0);
             hit.distance = finalT * length(r.dir);
             hit.normal = (i == 0) ? wholeBlockHit.normal : hitNormal;
             return hit;
@@ -293,7 +310,7 @@ HitInfo Traverse(Ray r)
 
     float finalT = outerBoundsHit.distance / length(r.dir);
     const float3 rayStart = r.origin + r.dir * finalT;
-    int3 coord = clamp(floor(rayStart), int3(0, 0, 0), int3(worldWidth - 1, worldHeight - 1, 0));
+    int3 coord = clamp(floor(rayStart), int3(0, 0, 0), int3(worldWidth - 1, worldHeight - 1, 1));
 
     //Step direction based on sign of ray direction
     const int3 step = sign(r.inv); //use inverse instead of dir bc of floating point
@@ -392,7 +409,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     const float2 block_uv = float2(uv.x * worldWidth, uv.y * worldHeight);
 
     //Find spot in texture
-    const float2 tex_uv = fmod(block_uv, 1);
+    const float2 tex_uv = frac(block_uv);
 
     //Get array x and y
     const int2 array_uv = int2((int) block_uv.x, (int) block_uv.y);
@@ -415,8 +432,8 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     const float ag_texIndex = ag_state.texIndex + ag_state.animated * fmod(floor(Time * ag_state.fps), (float) ag_state.numFrames);
 
     //Adjusting tex_uv to account for rotation
-    const float2 g_adjusted_tex_uv = (g_block.rotated ^ 1) * tex_uv + g_block.rotated * float2(tex_uv.y, tex_uv.x);
-    const float2 ag_adjusted_tex_uv = (ag_block.rotated ^ 1) * tex_uv + ag_block.rotated * float2(tex_uv.y, tex_uv.x);
+    const float2 g_adjusted_tex_uv = (1.0 - g_block.rotated) * tex_uv + g_block.rotated * float2(tex_uv.y, tex_uv.x);
+    const float2 ag_adjusted_tex_uv = (1.0 - ag_block.rotated) * tex_uv + ag_block.rotated * float2(tex_uv.y, tex_uv.x);
 
     //Getting color of pixel at the blocks
     const float4 g_col = _BlockTexs.SampleLevel(sampler_BlockTexs, float3(g_adjusted_tex_uv.x, g_adjusted_tex_uv.y, g_texIndex), 0.0);
@@ -425,7 +442,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     //Combining colors for final color
     const float4 final_col = AlphaBlend(g_col, ag_col);
 
-    float height = 1;
+    float height = 1.0;
 
     if (ag_state.height != 0)
     {
@@ -440,7 +457,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         }
     }
 
-    const float3 origin = float3(block_uv.x, block_uv.y, height + 0.01); 
+    const float3 origin = float3(block_uv.x, block_uv.y, height + 0.001); 
     Ray sunRay;
     sunRay.origin = origin;
     // sunRay.dir = Sun - origin;
@@ -450,10 +467,10 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     HitInfo hit = Traverse(sunRay);
 
     const float4 errorColor = float4(hit.pos, 1);
-    const float4 shadowAdjustedColor = final_col * (1 - 0.5 * hit.collide);
+    const float4 shadowAdjustedColor = final_col * (((1 - hit.collide) * directLight) + (hit.collide * indirectLight));
     
-    Result[id.xy] = hit.error * errorColor + (1 ^ hit.error) * shadowAdjustedColor;
+    Result[id.xy] = hit.error * errorColor + (1.0 - hit.error) * shadowAdjustedColor;
     // Result[id.xy] = float4(fmod(hit.pos, 1), 1);
-    // Result[id.xy] = float4(height - 1, 0, 0, 1);
+    // Result[id.xy] = float4(origin.z - 1, 0, 0, 1);
     // Result[id.xy] = float4(hit.distance / 1, 0, 0, 1);
 }
