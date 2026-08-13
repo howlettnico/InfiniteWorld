@@ -15,13 +15,21 @@ MonoBehaviour:
   ID: 40
   blockName: Large Grass
   texture: {fileID: 2800000, guid: 97c25659cb9714ebe9050ae5f147eebb, type: 3}
-  textureIndex: 3
-  animated: 0
-  animationFrameCount: 1
-  animationFPS: 1
+  customHeightTexture: {fileID: 2800000, guid: b9ab6c35172024544acea796b1e0a170, type: 3}
+  states:
+  - baseTextureIndex: 0
+    trueTextureIndex: 4
+    animated: 0
+    animationFrameCount: 1
+    animationFPS: 1
+    height: 100
+    baseHeightTextureIndex: 0
+    trueHeightTextureIndex: 0
+    heightAnimated: 0
+    heightExtends: 2
   rotatable: 0
-  drops: []
   solid: 0
   replaceable: 1
   blockScript: 0
   customData: 0
+  drops: []
