@@ -12,9 +12,9 @@ namespace Editor
         {
             BlockTypeCollection tc = (BlockTypeCollection) target;
 
-            if (GUILayout.Button("Generate Texture"))
+            if (GUILayout.Button("Generate Textures"))
             {
-                BlockTextureManager.UpdateCombinedTexture(tc);
+                BlockTextureManager.UpdateCombinedTextures(tc);
                 
             }
             base.OnInspectorGUI();
