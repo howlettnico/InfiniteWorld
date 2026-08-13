@@ -21,6 +21,14 @@ MonoBehaviour:
     animated: 0
     animationFrameCount: 1
     animationFPS: 1
+<<<<<<< Updated upstream
+=======
+    height: 8
+    baseHeightTextureIndex: 0
+    trueHeightTextureIndex: 1
+    heightAnimated: 0
+    heightExtends: 0
+>>>>>>> Stashed changes
   rotatable: 1
   drops:
   - ID: 10
