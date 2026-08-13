@@ -29,7 +29,7 @@ namespace World.Blocks.CustomBlocks
                             left?.type.ID == BlockType.BlockTypeID.Grass ? 1 : 0 +
                             right?.type.ID == BlockType.BlockTypeID.Grass ? 1 : 0;
             
-            if (Random.Range(0, 1000) < neighbors)
+            if (Random.Range(0, 10000) < neighbors)
             {
                 _blockManager.SetBlock(block.pos, _blockManager.NewBlock(BlockType.BlockTypeID.Grass, block.pos, true, false, 0, true), true);
             }
