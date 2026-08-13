@@ -24,6 +24,12 @@ MonoBehaviour:
     animationFPS: 1
     height: 100
     baseHeightTextureIndex: 0
+    trueHeightTextureIndex: 2
+    heightAnimated: 0
+    heightExtends: 0
+=======
+    height: 100
+    baseHeightTextureIndex: 0
     trueHeightTextureIndex: 1
     heightAnimated: 0
     heightExtends: 0

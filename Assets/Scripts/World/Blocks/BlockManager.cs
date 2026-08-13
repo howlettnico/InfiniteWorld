@@ -23,6 +23,12 @@ namespace World.Blocks
         {
             _loadManager = App.App.Get<ChunkLoadManager>();
             
+            LoadTypes();
+        }
+
+        [ContextMenu("Reload Types")]
+        private void LoadTypes()
+        {
             types = typeCollection.types;
 
             typeIDToIndex = new Dictionary<int, int>();

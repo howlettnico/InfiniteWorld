@@ -22,7 +22,7 @@ MonoBehaviour:
     animated: 0
     animationFrameCount: 1
     animationFPS: 1
-    height: 7
+    height: 8
     baseHeightTextureIndex: 0
     trueHeightTextureIndex: 1
     heightAnimated: 0
