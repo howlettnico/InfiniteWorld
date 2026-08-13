@@ -1116,7 +1116,9 @@ MonoBehaviour:
   worldWidth: 40
   worldHeight: 30
   perPixel: 0
-  sunPos: {x: -10, y: 0.1, z: 10}
+  sunPos: {x: -7, y: -5, z: 10}
+  directLight: {r: 1, g: 1, b: 1, a: 1}
+  indirectLight: {r: 0.5188679, g: 0.5188679, b: 0.5188679, a: 1}
 --- !u!23 &1528047035
 MeshRenderer:
   m_ObjectHideFlags: 0
